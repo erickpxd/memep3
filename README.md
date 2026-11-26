@@ -22,7 +22,7 @@ Abra http://localhost:3000. Use HTTPS em produção para permitir microfone, com
 
 O botão **Compartilhar** no cabeçalho envia o link da página. No resultado, **Baixar** salva o WebP por padrão. Quando também há uma versão em vídeo, escolha o formato na prévia. Para MP4 com áudio, a janela de salvar sugere a pasta de vídeos quando o navegador oferece esse recurso.
 
-**Enviar ao bot** baixa o vídeo com áudio e abre o [figurinhas.live](https://figurinhas.live/) em outra aba. Envie o vídeo exportado ao serviço para receber a figurinha sonora no grupo de entregas do WhatsApp. Para um resultado sem áudio, a ação abre o compartilhamento do dispositivo para a conversa privada do [Felku](https://felku.com.br/felku/bot-de-figurinhas). Em navegadores sem compartilhamento de arquivos, a ação abre a conversa do Felku para você anexar o arquivo de **Baixar**.
+**Enviar ao bot** baixa o vídeo com áudio e abre a [área de envio do figurinhas.live](https://figurinhas.live/#stage) em outra aba. Selecione o vídeo exportado e informe seu número para receber a figurinha sonora no grupo de entregas do WhatsApp. Para um resultado sem áudio, a ação abre o compartilhamento do dispositivo para a conversa privada do [Felku](https://felku.com.br/felku/bot-de-figurinhas). Em navegadores sem compartilhamento de arquivos, a ação abre a conversa do Felku para você anexar o arquivo de **Baixar**.
 
 O compartilhamento de vídeo com o Felku inclui o endereço do MemeP3 na descrição. Defina `NEXT_PUBLIC_MEMEP3_URL` antes do build para usar um domínio diferente de `memep3.vercel.app`.
 

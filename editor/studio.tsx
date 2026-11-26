@@ -20,7 +20,7 @@ type Output = Rendered & { stickerUrl: string; videoUrl?: string; videoFilename?
 type ResultType = "video" | "sticker";
 type ResultFile = { blob: Blob; url: string; name: string };
 const felkuChat = "https://wa.me/5511978775451";
-const soundStickerService = "https://figurinhas.live/";
+const soundStickerService = "https://figurinhas.live/#stage";
 
 const choices = [
   { mode: "original", icon: "music", title: "Manter áudio original", detail: "Usa o som que já está no vídeo." },
@@ -503,7 +503,7 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
                 setResultType("video");
                 download(videoFile.url, videoFile.name);
               }}>Enviar ao bot</a>
-              <p className="hint">O botão baixa o vídeo com áudio e abre o figurinhas.live. Envie o vídeo lá para receber a figurinha com som no grupo de entregas do WhatsApp.</p>
+              <p className="hint">O botão baixa o vídeo e abre a área de envio. Selecione o vídeo baixado, confirme o trecho e informe seu número. O bot entrega a figurinha no grupo do WhatsApp.</p>
             </> : <ShareWithStickerBot file={botFile} onFallback={() => { if (videoFile) setResultType("video"); }} />}
             <button className="button outline" onClick={reset}>Criar outra figurinha</button>
             {output.audioWarning && <p className="hint" role="status">{output.audioWarning}</p>}
