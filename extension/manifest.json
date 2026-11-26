@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "MemeP3",
+  "version": "1.0.0",
+  "description": "Crie figurinhas com som e exporte seus arquivos direto no navegador.",
+  "icons": { "128": "favicon.png" },
+  "action": { "default_title": "Abrir MemeP3", "default_icon": "favicon.png" },
+  "content_security_policy": { "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';" },
+  "background": { "service_worker": "launch.js", "type": "module" },
+  "host_permissions": ["https://www.myinstants.com/*", "https://myinstants.com/*"]
+}
