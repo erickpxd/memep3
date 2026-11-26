@@ -2,21 +2,6 @@ function cancelled(error: unknown) {
   return error instanceof DOMException && error.name === "AbortError";
 }
 
-export function shareDescription(siteUrl = process.env.NEXT_PUBLIC_MEMEP3_URL) {
-  let link = "https://memep3.vercel.app";
-  if (siteUrl) {
-    try {
-      const address = new URL(siteUrl);
-      if (address.protocol === "http:" || address.protocol === "https:") {
-        link = address.origin + (address.pathname === "/" ? "" : address.pathname);
-      }
-    } catch {
-      // Keep the provisional URL when the configured address is invalid.
-    }
-  }
-  return `Feito no MemeP3 · ${link}`;
-}
-
 export async function shareSite(url: string) {
   const address = new URL(url);
   if (!["https:", "http:"].includes(address.protocol)) throw new Error("Abra o site para compartilhar o endereço.");
@@ -43,18 +28,6 @@ export async function shareSite(url: string) {
     }
   }
   return address.href;
-}
-
-export async function shareStickerFile(blob: Blob, filename: string) {
-  const files = [new File([blob], filename, { type: blob.type })];
-  try {
-    if (!navigator.share || !navigator.canShare?.({ files })) return "unavailable";
-    // Felku renders captions on photos. Keep the site address off the sticker.
-    await navigator.share(blob.type.startsWith("video/") ? { files, text: shareDescription() } : { files });
-    return "shared";
-  } catch (error) {
-    return cancelled(error) ? "cancelled" : "unavailable";
-  }
 }
 
 type VideoSavePicker = (options: {

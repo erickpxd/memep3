@@ -9,17 +9,17 @@ import type { Crop } from "./framing";
 import { FramingView, framingStyle } from "./framing-view";
 import { useRecording } from "./recording";
 import type { Rendered } from "./render";
-import { saveVideoForImport, shareStickerFile } from "./share";
+import { saveVideoForImport } from "./share";
+import { makeStickerPack, MAX_PACK_SIZE, MIN_PACK_SIZE } from "./sticker-pack";
 import { capAudio, initialRange, MAX_CLIP, MIN_CLIP, rangeDuration, timeLabel } from "./timing";
 import type { Range } from "./timing";
 
-type Screen = "home" | "video" | "record" | "audio" | "preview" | "processing" | "success" | "error";
+type Screen = "home" | "video" | "record" | "audio" | "preview" | "processing" | "success" | "pack" | "error";
 type AudioMode = "original" | "replace" | "mute";
 type Sound = { file: File; buffer: AudioBuffer; recorded: boolean };
 type Output = Rendered & { stickerUrl: string; videoUrl?: string; videoFilename?: string };
 type ResultType = "video" | "sticker";
 type ResultFile = { blob: Blob; url: string; name: string };
-const felkuChat = "https://wa.me/5511978775451";
 const soundStickerService = "https://figurinhas.live/#stage";
 
 const choices = [
@@ -66,31 +66,6 @@ function DownloadResult({ file, chooseLocation }: { file: ResultFile; chooseLoca
   </> : <a className="button outline" href={file.url} download={file.name}><Icon name="download" />Baixar</a>;
 }
 
-function ShareWithStickerBot({ file, onFallback }: { file: ResultFile; onFallback: () => void }) {
-  const [status, setStatus] = useState<"idle" | "sharing" | "shared" | "unavailable">("idle");
-
-  async function share() {
-    setStatus("sharing");
-    const result = await shareStickerFile(file.blob, file.name);
-    if (result === "unavailable") {
-      onFallback();
-      if (navigator.userActivation?.isActive) window.open(felkuChat, "_blank", "noopener,noreferrer");
-    }
-    setStatus(result === "cancelled" ? "idle" : result);
-  }
-
-  return <>
-    {status === "unavailable"
-      ? <a className="button primary" href={felkuChat} target="_blank" rel="noopener noreferrer" onClick={onFallback}>Enviar ao bot</a>
-      : <button type="button" className="button primary" onClick={() => void share()} disabled={status === "sharing"}>Enviar ao bot</button>}
-    <p className="hint" role="status">{status === "unavailable"
-      ? <>Use <strong>Baixar</strong> e anexe o arquivo na conversa do Felku.</>
-      : status === "shared"
-        ? "Confira a conversa do Felku no WhatsApp para acompanhar a resposta."
-        : "No WhatsApp, escolha o Felku (+55 11 97877-5451). O bot cria figurinhas sem som."}</p>
-  </>;
-}
-
 function Create({ onClick, disabled, label = "Criar minha figurinha" }: { onClick?: () => void; disabled?: boolean; label?: string }) {
   return <button className="button primary create" disabled={disabled} onClick={onClick}><Icon name="wand" />{label}</button>;
 }
@@ -106,6 +81,9 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
   const [position, setPosition] = useState(0);
   const [prepared, setPrepared] = useState<AudioBuffer>();
   const [output, setOutput] = useState<Output>();
+  const [pack, setPack] = useState<{ animated: boolean; stickers: Blob[] }>();
+  const [packName, setPackName] = useState("Minhas figurinhas");
+  const [packFile, setPackFile] = useState<string>();
   const [resultType, setResultType] = useState<ResultType>("sticker");
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
@@ -141,6 +119,7 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
     }
   }, [output]);
   useEffect(() => () => job.current?.abort(), []);
+  useEffect(() => () => { if (packFile) URL.revokeObjectURL(packFile); }, [packFile]);
   useEffect(() => {
     if (screen !== previousScreen.current) {
       previousScreen.current = screen;
@@ -220,6 +199,30 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
     go("home");
   }
 
+  function addToPack() {
+    if (!output || busy) return;
+    setPackFile(undefined);
+    go("pack");
+    if (pack?.stickers.includes(output.sticker)) return;
+    if (pack && pack.animated !== output.animated) {
+      setError(pack.animated ? "O pacote atual aceita figurinhas animadas. A figurinha atual é estática." : "O pacote atual aceita figurinhas estáticas. A figurinha atual é animada.");
+      return;
+    }
+    if (pack?.stickers.length === MAX_PACK_SIZE) {
+      setError("O pacote está cheio. Baixe-o antes de iniciar outro.");
+      return;
+    }
+    setPack({ animated: output.animated, stickers: [...(pack?.stickers ?? []), output.sticker] });
+  }
+
+  async function preparePack() {
+    if (!pack) return;
+    await load("Preparando o pacote…", async () => {
+      const file = await makeStickerPack(packName, pack.animated, pack.stickers);
+      setPackFile(URL.createObjectURL(file));
+    }, "Não foi possível montar o pacote.");
+  }
+
   function stopJob() {
     job.current?.abort();
     job.current = null;
@@ -294,7 +297,6 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
     : undefined;
   const stickerFile = output ? { blob: output.sticker, url: output.stickerUrl, name: "memep3.webp" } : undefined;
   const resultFile = resultType === "video" ? videoFile ?? stickerFile : stickerFile;
-  const botFile = videoFile ?? stickerFile;
   const stickerVisual = useMemo<Visual | undefined>(() => output ? {
     url: output.stickerUrl, file: new File([output.sticker], "memep3.webp", { type: "image/webp" }),
     mime: "image/webp", kind: output.animated ? "animation" : "image", duration: output.duration,
@@ -478,7 +480,7 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
         </section>
       </>}
 
-      {screen === "success" && output && stickerVisual && resultFile && botFile && <>
+      {screen === "success" && output && stickerVisual && resultFile && <>
         <Heading title="Sua figurinha está pronta!" detail="Veja como ficou e compartilhe a diversão." />
         <div className="result-grid">
           <section className="card preview-card">
@@ -504,11 +506,33 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
                 download(videoFile.url, videoFile.name);
               }}>Enviar ao bot</a>
               <p className="hint">O botão baixa o vídeo e abre a área de envio. Selecione o vídeo baixado, confirme o trecho e informe seu número. O bot entrega a figurinha no grupo do WhatsApp.</p>
-            </> : <ShareWithStickerBot file={botFile} onFallback={() => { if (videoFile) setResultType("video"); }} />}
+            </> : <button type="button" className="button primary" onClick={addToPack}>Adicionar ao WhatsApp</button>}
             <button className="button outline" onClick={reset}>Criar outra figurinha</button>
             {output.audioWarning && <p className="hint" role="status">{output.audioWarning}</p>}
           </section>
         </div>
+      </>}
+
+      {screen === "pack" && pack && <>
+        <Heading title="Pacote para o WhatsApp" detail="Reúna de 3 a 30 figurinhas do mesmo tipo." onBack={busy ? undefined : () => go("success")} />
+        <section className="card result-panel">
+          <div className="result-info"><div><strong>{pack.stickers.length} de {MAX_PACK_SIZE} figurinhas</strong><small>{pack.animated ? "Pacote animado" : "Pacote estático"}</small></div></div>
+          <label className="result-format">Nome do pacote<input value={packName} maxLength={128} disabled={Boolean(busy)} onChange={(event) => {
+            setPackName(event.currentTarget.value);
+            setPackFile(undefined);
+          }} /></label>
+          {notice}
+          {packFile ? <>
+            <a className="button primary" href={packFile} download="memep3.memep3pack"><Icon name="download" />Baixar pacote</a>
+            <a className="button outline" href="memep3://importar">Abrir app MemeP3</a>
+            <p className="hint">Com o app MemeP3 instalado, abra o arquivo baixado pelo botão Importar pacote e confirme no WhatsApp.</p>
+            <button type="button" className="button outline" onClick={() => { setPack(undefined); setPackFile(undefined); reset(); }}>Iniciar outro pacote</button>
+          </> : <>
+            <button type="button" className="button primary" disabled={Boolean(busy) || pack.stickers.length < MIN_PACK_SIZE || !packName.trim()} onClick={() => void preparePack()}>Preparar pacote</button>
+            <button type="button" className="button outline" disabled={Boolean(busy)} onClick={reset}>Criar outra figurinha</button>
+            <button type="button" className="button outline" disabled={Boolean(busy)} onClick={() => { setPack(undefined); setPackFile(undefined); go("success"); }}>Esvaziar pacote</button>
+          </>}
+        </section>
       </>}
 
       {screen === "error" && <>

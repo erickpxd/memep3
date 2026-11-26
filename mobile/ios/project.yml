@@ -1,0 +1,25 @@
+name: MemeP3
+options:
+  deploymentTarget:
+    iOS: "16.0"
+targets:
+  MemeP3:
+    type: application
+    platform: iOS
+    sources: [MemeP3]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.memep3.packs
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: "1.0"
+    info:
+      path: Info.plist
+      properties:
+        CFBundleDisplayName: MemeP3
+        LSApplicationQueriesSchemes: [whatsapp]
+        CFBundleURLTypes:
+          - CFBundleURLName: app.memep3.packs
+            CFBundleURLSchemes: [memep3]
+        UILaunchScreen: {}

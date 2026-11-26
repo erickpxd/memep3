@@ -243,7 +243,7 @@ input[type="range"]:not(.handle), input[type="radio"] { accent-color: var(--link
 .result-info strong { display: block; font-size: .9375rem; overflow-wrap: anywhere; }
 .result-info small { display: block; color: var(--muted); margin-top: 3px; }
 .result-format { display: grid; gap: 5px; font-size: .875rem; font-weight: 650; }
-.result-format select { min-width: 0; width: 100%; min-height: 44px; padding: 7px 9px; border: 1px solid #b9c6d2; border-radius: 8px; color: var(--text); background: var(--bg); font: inherit; font-weight: 400; }
+.result-format :is(select, input) { min-width: 0; width: 100%; min-height: 44px; padding: 7px 9px; border: 1px solid #b9c6d2; border-radius: 8px; color: var(--text); background: var(--bg); font: inherit; font-weight: 400; }
 .state-card { display: grid; justify-items: center; gap: 18px; padding: 48px 24px; text-align: center; }
 .state-card > img.icon { animation: rotate 1s linear infinite; }
 .state-content { display: grid; gap: 13px; width: min(100%, 560px); }

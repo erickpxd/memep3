@@ -22,9 +22,19 @@ Abra http://localhost:3000. Use HTTPS em produção para permitir microfone, com
 
 O botão **Compartilhar** no cabeçalho envia o link da página. No resultado, **Baixar** salva o WebP por padrão. Quando também há uma versão em vídeo, escolha o formato na prévia. Para MP4 com áudio, a janela de salvar sugere a pasta de vídeos quando o navegador oferece esse recurso.
 
-**Enviar ao bot** baixa o vídeo com áudio e abre a [área de envio do figurinhas.live](https://figurinhas.live/#stage) em outra aba. Selecione o vídeo exportado e informe seu número para receber a figurinha sonora no grupo de entregas do WhatsApp. Para um resultado sem áudio, a ação abre o compartilhamento do dispositivo para a conversa privada do [Felku](https://felku.com.br/felku/bot-de-figurinhas). Em navegadores sem compartilhamento de arquivos, a ação abre a conversa do Felku para você anexar o arquivo de **Baixar**.
+**Enviar ao bot** baixa o vídeo com áudio e abre a [área de envio do figurinhas.live](https://figurinhas.live/#stage) em outra aba. Selecione o vídeo exportado e informe seu número para receber a figurinha sonora no grupo de entregas do WhatsApp.
 
-O compartilhamento de vídeo com o Felku inclui o endereço do MemeP3 na descrição. Defina `NEXT_PUBLIC_MEMEP3_URL` antes do build para usar um domínio diferente de `memep3.vercel.app`.
+### Adicionar um pacote sem áudio ao WhatsApp
+
+1. Gere uma figurinha sem áudio e escolha **Adicionar ao WhatsApp** na tela de resultado. Repita para reunir de 3 a 30 figurinhas. O WhatsApp exige pacotes separados para estáticas e animadas.
+2. Dê um nome ao pacote, escolha **Preparar pacote** e baixe o arquivo `.memep3pack`. Mantenha a página aberta enquanto monta o pacote.
+3. Com o app complementar instalado no celular, use **Abrir app MemeP3** e selecione o arquivo em **Importar pacote**.
+4. No app MemeP3, toque em **Adicionar ao WhatsApp** e confirme no WhatsApp. As figurinhas ficam disponíveis na bandeja de figurinhas da conversa.
+
+O site monta o pacote localmente. O importador usa a integração oficial de pacotes do [Android](https://github.com/WhatsApp/stickers/blob/main/Android/README.md) e do [iOS](https://github.com/WhatsApp/stickers/blob/main/iOS/README.md).
+
+- **Android**. Abra `mobile/android` no Android Studio com SDK 36 e JDK 17 ou 21. Para um APK local, execute `gradle :app:assembleDebug` em `mobile/android`. O arquivo sai em `app/build/outputs/apk/debug/app-debug.apk`.
+- **iPhone**. Em um Mac com Xcode e XcodeGen, execute `xcodegen generate` em `mobile/ios`, abra `MemeP3.xcodeproj`, selecione sua equipe de assinatura e rode no aparelho com WhatsApp instalado.
 
 - **WebP de figurinha** tem 512 × 512 px e até 100 KB para imagens estáticas, ou 500 KB e 10 segundos para animações. O arquivo fica sem áudio e segue os limites públicos das [figurinhas do WhatsApp](https://github.com/WhatsApp/stickers/blob/main/Android/README.md).
 - **Vídeo com áudio** sai em MP4 quando há suporte a H.264 e AAC, ou WebM quando há suporte a VP8/VP9 e Opus. A importação como figurinha depende das opções disponíveis no WhatsApp. A geração de figurinhas sonoras nativas exige uma interface pública que o WhatsApp ainda não documenta para sites.

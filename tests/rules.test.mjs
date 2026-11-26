@@ -5,7 +5,7 @@ import { build } from "esbuild";
 
 const { outputFiles } = await build({
   stdin: {
-    contents: 'export * from "./editor/timing"; export * from "./editor/webp"; export * from "./editor/share"; export * from "./editor/framing";',
+    contents: 'export * from "./editor/timing"; export * from "./editor/webp"; export * from "./editor/share"; export * from "./editor/framing"; export * from "./editor/sticker-pack";',
     resolveDir: fileURLToPath(new URL("..", import.meta.url)),
   },
   write: false,
@@ -34,48 +34,6 @@ test("salvar MP4 sugere a pasta de vídeos e respeita cancelamento e falta de su
   assert.deepEqual(calls.slice(1), [blob, "closed"]);
   globalThis.window.showSaveFilePicker = async () => { throw new DOMException("cancelado", "AbortError"); };
   assert.equal(await rules.saveVideoForImport(blob, "memep3.mp4"), "cancelled");
-});
-
-test("compartilhar com o bot entrega o vídeo ao sistema e respeita o cancelamento", async (context) => {
-  const original = Object.getOwnPropertyDescriptor(globalThis, "navigator");
-  context.after(() => Object.defineProperty(globalThis, "navigator", original));
-  const video = new Blob(["mp4"], { type: "video/mp4" });
-  const calls = [];
-  const navigator = {
-    canShare: ({ files }) => files[0].type === "video/mp4",
-    share: async (data) => calls.push(data),
-  };
-  Object.defineProperty(globalThis, "navigator", { configurable: true, value: navigator });
-  assert.equal(await rules.shareStickerFile(video, "memep3-com-audio.mp4"), "shared");
-  assert.equal(calls[0].files[0].name, "memep3-com-audio.mp4");
-  assert.equal(await calls[0].files[0].text(), "mp4");
-  assert.equal(calls[0].text, rules.shareDescription());
-  navigator.share = async () => { throw new DOMException("cancelado", "AbortError"); };
-  assert.equal(await rules.shareStickerFile(video, "memep3-com-audio.mp4"), "cancelled");
-  navigator.canShare = () => false;
-  assert.equal(await rules.shareStickerFile(video, "memep3-com-audio.mp4"), "unavailable");
-  assert.equal(calls.length, 1);
-});
-
-test("compartilhar WebP com o bot envia a figurinha sem legenda", async (context) => {
-  const original = Object.getOwnPropertyDescriptor(globalThis, "navigator");
-  context.after(() => Object.defineProperty(globalThis, "navigator", original));
-  const calls = [];
-  Object.defineProperty(globalThis, "navigator", { configurable: true, value: {
-    canShare: ({ files }) => files[0].type === "image/webp",
-    share: async (data) => calls.push(data),
-  } });
-  const sticker = new Blob(["webp"], { type: "image/webp" });
-  assert.equal(await rules.shareStickerFile(sticker, "memep3.webp"), "shared");
-  assert.equal(calls[0].files[0].name, "memep3.webp");
-  assert.equal(await calls[0].files[0].text(), "webp");
-  assert.equal("text" in calls[0], false);
-});
-
-test("a descrição do compartilhamento usa o link configurado ou o provisório", () => {
-  assert.equal(rules.shareDescription(""), "Feito no MemeP3 · https://memep3.vercel.app");
-  assert.equal(rules.shareDescription("https://meus-memes.example/criar?ref=teste"), "Feito no MemeP3 · https://meus-memes.example/criar");
-  assert.equal(rules.shareDescription("file:///tmp/meme"), "Feito no MemeP3 · https://memep3.vercel.app");
 });
 
 test("enquadramento mantém a proporção ao arrastar e reduzir o vídeo", () => {
@@ -138,6 +96,14 @@ test("empacota e valida a animação conforme limites do WhatsApp", () => {
   assert.throws(() => rules.validateSticker(rules.muxAnimation([{ ...frames[0], duration: 10_000 }, frames[1]]), true), /limites/);
   assert.throws(() => rules.validateSticker(rules.muxAnimation([{ ...frames[0], duration: 7 }, frames[1]]), true), /limites/);
   assert.throws(() => rules.validateSticker(rules.muxAnimation(frames.map(frame => ({ ...frame, bytes: new Uint8Array(251_000) }))), true), /limites/);
+});
+
+test("valida quantidade, nome e tipo antes de exportar um pacote", async () => {
+  const invalid = new Blob(["não é WebP"], { type: "image/webp" });
+  await assert.rejects(rules.makeStickerPack("Teste", false, [invalid, invalid]), /3 a 30/);
+  await assert.rejects(rules.makeStickerPack("   ", false, [invalid, invalid, invalid]), /nome/);
+  await assert.rejects(rules.makeStickerPack("Teste", true, Array(31).fill(invalid)), /3 a 30/);
+  await assert.rejects(rules.makeStickerPack("Teste", false, [invalid, invalid, invalid]), /WebP/);
 });
 
 test("o compartilhamento do cabeçalho contém só o link e o cancelamento não copia", async (context) => {
