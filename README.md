@@ -1,60 +1,93 @@
+<div align="center">
+
+<img src="wiki/assets/memep3.png" width="160" height="160" alt="Logo do MemeP3">
+
 # MemeP3
 
-Editor de figurinhas que roda no navegador, em Next.js e TypeScript. A interface segue o [Figma do MemeP3](https://www.figma.com/design/WKxiDUIB4OApWJkoQd0gTw/memep3?node-id=0-1) e usa os assets preparados em `web/public/`.
+**Crie figurinhas para o WhatsApp a partir de imagens, GIFs e vídeos. Recorte, enquadre e experimente com som.**
 
-## Executar
+[**Abrir editor**](https://memep3.vercel.app/) · [Wiki](wiki/README.md) · [Design no Figma](https://www.figma.com/design/WKxiDUIB4OApWJkoQd0gTw/memep3?node-id=0-1) · [Reportar problema](https://github.com/erickpxd/memep3/issues)
+
+**Português (BR)** · [English](wiki/readme/README.en.md) · [Español](wiki/readme/README.es.md) · [Français](wiki/readme/README.fr.md)
+
+</div>
+
+## O que dá para fazer
+
+- Use imagens PNG, JPG e WebP, GIFs animados e vídeos MP4, MOV e WebM, conforme os codecs do navegador.
+- Escolha um trecho de até 10 segundos e ajuste o enquadramento quadrado arrastando e redimensionando a mídia.
+- Mantenha o som do vídeo, importe um áudio, grave pelo microfone ou crie uma figurinha sem áudio. A prévia permite conferir o recorte e a sincronização.
+- Exporte figurinhas WebP estáticas ou animadas, vídeos com áudio em MP4 ou WebM e pacotes `.memep3pack` para os apps móveis.
+
+## Onde usar
+
+| Plataforma | O que oferece |
+| --- | --- |
+| **Web** | Editor no navegador, com processamento local dos arquivos. [Abrir o MemeP3](https://memep3.vercel.app/) |
+| **Chrome e Edge** | O mesmo editor em uma extensão, com importação de áudio do MyInstants. [Instalar a extensão localmente](wiki/desenvolvimento.md#extensão-do-chrome-e-edge) |
+| **Android e iPhone** | Apps complementares para adicionar pacotes sem áudio no WhatsApp. [Compilar os apps](wiki/desenvolvimento.md#app-android) |
+
+## Criar e salvar no WhatsApp
+
+1. Selecione, cole ou arraste um arquivo para o editor.
+2. Ajuste o enquadramento, o trecho e o áudio. Confira a prévia e gere o resultado.
+3. Use **Baixar** para guardar o arquivo ou **Salvar no WhatsApp** para iniciar o fluxo disponível no seu dispositivo.
+
+No Android, com o app MemeP3 instalado, **Salvar no WhatsApp** baixa o WebP e abre o importador. O app reúne três figurinhas diferentes do mesmo tipo em um pacote. No computador ou iPhone, o editor pode reunir de 3 a 30 figurinhas do mesmo tipo em um arquivo `.memep3pack` para abrir no app móvel. A adição termina com a confirmação no WhatsApp. [Guia de importação](wiki/whatsapp.md)
+
+Para usar o áudio, baixe a versão em vídeo e selecione-a em **Figurinhas → Criar** no WhatsApp. A opção de manter o áudio depende da disponibilidade do ícone de som na sua conta.
+
+## Formatos de saída
+
+| Formato | Uso |
+| --- | --- |
+| **WebP estático** | Figurinha sem áudio de 512 × 512 px e até 100 KB. |
+| **WebP animado** | Figurinha sem áudio de 512 × 512 px, até 500 KB e até 10 segundos. |
+| **MP4 ou WebM** | Vídeo com o áudio editado. O formato depende dos codecs disponíveis no navegador. |
+| **`.memep3pack`** | Pacote local com figurinhas estáticas ou animadas para importar no app MemeP3. |
+
+## Desenvolvimento
 
 Requer Node.js 22 ou superior.
 
-```bash
+```sh
+git clone https://github.com/erickpxd/memep3.git
+cd memep3
 npm ci
 npm run dev
 ```
 
-Abra http://localhost:3000. Use HTTPS em produção para permitir microfone, compartilhamento e acesso às APIs de mídia. `npm run build:web` gera os arquivos estáticos em `web/out/`. Eles podem ser hospedados sem servidor Next.js.
+Abra [localhost:3000](http://localhost:3000). Execute estes comandos para validar as mudanças e gerar os builds.
 
-## Criar e compartilhar
-
-1. Selecione, cole ou arraste uma imagem, um GIF ou um vídeo. São aceitos PNG, JPG, WebP, GIF, MP4, MOV e WebM, conforme os codecs do navegador. Imagens e animações têm limite de 25 MB, vídeos de 250 MB.
-2. Para vídeos, escolha um trecho de até 10 segundos com os controles da timeline ou os campos de início e fim. O editor lê o trecho escolhido para a exportação.
-3. Mantenha o áudio original de um vídeo compatível, envie um arquivo de áudio, grave pelo microfone ou selecione **Sem áudio**. O recorte de áudio pode ser posicionado dentro da animação.
-4. Reproduza a prévia, gere o resultado e escolha o formato para baixar ou compartilhar.
-
-O botão **Compartilhar** no cabeçalho envia o link da página. No resultado, **Baixar** salva o WebP por padrão. Quando também há uma versão em vídeo, escolha o formato na prévia. Para MP4 com áudio, a janela de salvar sugere a pasta de vídeos quando o navegador oferece esse recurso.
-
-No Android, com o importador MemeP3 1.1 instalado, **Salvar no WhatsApp** baixa o WebP e abre o seletor de arquivos do app MemeP3. Selecione o WebP em Downloads. O app reúne três figurinhas diferentes do mesmo tipo e oferece **Adicionar ao WhatsApp**. Esse pacote fica sem áudio. Para exportar o vídeo com áudio, escolha o formato de vídeo na prévia e use **Baixar**.
-
-Nos outros navegadores, para resultados com áudio, **Salvar no WhatsApp** salva o vídeo para seleção em **Figurinhas → Criar** no WhatsApp. Manter a faixa sonora depende da disponibilidade do botão de som no editor do WhatsApp.
-
-### Adicionar um pacote sem áudio ao WhatsApp
-
-1. Para montar o pacote no navegador e transferir ao celular, gere uma figurinha sem áudio e escolha **Salvar no WhatsApp** em um computador ou iPhone. Repita para reunir de 3 a 30 figurinhas. O WhatsApp exige pacotes separados para estáticas e animadas.
-2. Dê um nome ao pacote, escolha **Preparar pacote** e baixe o arquivo `.memep3pack`. Mantenha a página aberta enquanto monta o pacote.
-3. Com o app complementar instalado no celular, use **Abrir app MemeP3** e selecione o arquivo em **Importar pacote**.
-4. No app MemeP3, toque em **Adicionar ao WhatsApp** e confirme no WhatsApp. As figurinhas ficam disponíveis na bandeja de figurinhas da conversa.
-
-O site monta o pacote localmente. O importador usa a integração oficial de pacotes do [Android](https://github.com/WhatsApp/stickers/blob/main/Android/README.md) e do [iOS](https://github.com/WhatsApp/stickers/blob/main/iOS/README.md).
-
-- **Android**. Abra `mobile/android` no Android Studio com SDK 36 e JDK 17 ou 21. Para um APK local, execute `gradle :app:assembleDebug` em `mobile/android`. O arquivo sai em `app/build/outputs/apk/debug/app-debug.apk`.
-- **iPhone**. Em um Mac com Xcode e XcodeGen, execute `xcodegen generate` em `mobile/ios`, abra `MemeP3.xcodeproj`, selecione sua equipe de assinatura e rode no aparelho com WhatsApp instalado.
-
-- **WebP de figurinha** tem 512 × 512 px e até 100 KB para imagens estáticas, ou 500 KB e 10 segundos para animações. O arquivo fica sem áudio e segue os limites públicos das [figurinhas do WhatsApp](https://github.com/WhatsApp/stickers/blob/main/Android/README.md).
-- **Vídeo com áudio** sai em MP4 quando há suporte a H.264 e AAC, ou WebM quando há suporte a VP8/VP9 e Opus. A importação como figurinha depende das opções disponíveis no WhatsApp. A geração de figurinhas sonoras nativas exige uma interface pública que o WhatsApp ainda não documenta para sites.
-
-O editor processa e exporta os arquivos no dispositivo. O editor usa Web Audio para recorte e prévia, Mediabunny para leitura e escrita de mídia e gifuct-js para compor quadros GIF. Quando o navegador não oferece codificação nativa em WebP ou AAC, o editor carrega os codecs WebAssembly locais sob demanda. O navegador só solicita acesso ao microfone ao iniciar uma gravação.
-
-## Extensão
-
-```bash
-npm run build:extension
-```
-
-Em `chrome://extensions` ou `edge://extensions`, ative o modo do desenvolvedor e carregue a pasta `extension/dist/`. A extensão abre o mesmo editor em uma aba. O campo adicional do MyInstants baixa um áudio apenas quando o usuário solicita.
-
-## Testes
-
-```bash
+```sh
 npm test
 npm run typecheck
 npm run build
 ```
+
+O build gera o site estático em `web/out/` e a extensão em `extension/dist/`. A wiki reúne os passos para carregar a extensão, compilar o APK e gerar o projeto do iPhone. [Guia de desenvolvimento](wiki/desenvolvimento.md)
+
+## Estrutura do repositório
+
+```text
+memep3/
+├── web/        Site Next.js e arquivos públicos
+├── extension/  Extensão do navegador
+├── mobile/     Apps Android e iPhone
+├── shared/     Editor compartilhado, codecs e testes
+└── wiki/       Documentação e traduções do README
+```
+
+O editor usa Next.js e React com TypeScript, Mediabunny para leitura e codificação de mídia e codecs WebAssembly sob demanda. As mídias enviadas ao editor são processadas no dispositivo. A extensão consulta o MyInstants quando você pede a importação de um link. [Arquitetura](wiki/arquitetura.md)
+
+## Contribuir
+
+- Para relatar um problema, informe a plataforma, o navegador ou a versão do app, o formato do arquivo e os passos para reproduzir. [Abrir uma issue](https://github.com/erickpxd/memep3/issues/new)
+- Para propor uma mudança, trabalhe em um fork, rode os testes e abra um pull request com o resultado esperado e o que você verificou. [Pull requests](https://github.com/erickpxd/memep3/pulls)
+- Ao mudar um fluxo, atualize a wiki e as versões do README afetadas. [Índice da wiki](wiki/README.md)
+
+## Créditos e licença
+
+O StikSound inspirou o projeto. [StikSound](https://github.com/SilverFeit/StikSound)
+
+Você pode usar o código do MemeP3 sob a licença [MIT](LICENSE-MIT) ou [Apache 2.0](LICENSE-APACHE), à sua escolha. As dependências de terceiros seguem suas próprias licenças.
