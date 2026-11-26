@@ -153,24 +153,25 @@ async function animatedSticker(request: RenderRequest) {
   throw new Error("A animação ainda ultrapassa 500 KB. Tente um recorte mais curto.");
 }
 
-async function soundVideo(request: RenderRequest, audio: AudioBuffer, container: "mp4" | "webm") {
+async function exportVideo(request: RenderRequest, container: "mp4" | "webm") {
   const {
     AudioBufferSource, BufferTarget, canEncodeAudio, CanvasSource,
     getFirstEncodableVideoCodec, Mp4OutputFormat, Output, WebMOutputFormat,
     Input, BlobSource, MP4, WEBM,
   } = await import("mediabunny");
-  const audioConfig = { sampleRate: audio.sampleRate, numberOfChannels: audio.numberOfChannels, bitrate: 96_000 };
+  const { audio } = request;
+  const audioConfig = audio && { sampleRate: audio.sampleRate, numberOfChannels: audio.numberOfChannels, bitrate: 96_000 };
   const videoConfig = { width: SIDE, height: SIDE, bitrate: 1_400_000 };
   const mp4 = container === "mp4";
   const codec = await getFirstEncodableVideoCodec(mp4 ? ["avc"] : ["vp9", "vp8"], videoConfig);
-  if (codec && mp4 && !(await canEncodeAudio("aac", audioConfig))) {
+  if (codec && mp4 && audioConfig && !(await canEncodeAudio("aac", audioConfig))) {
     const { registerAacEncoder } = await import("@mediabunny/aac-encoder");
     request.signal.throwIfAborted();
     Reflect.set(globalThis, Symbol.for("@mediabunny/aac-encoder:workerUrl"), new URL("./codecs/mediabunny-aac-encoder.worker.js", window.location.href).href);
     registerAacEncoder();
   }
-  if (!codec || !(await canEncodeAudio(mp4 ? "aac" : "opus", audioConfig))) {
-    throw new Error("Este navegador não consegue gerar um vídeo com áudio. O WebP continua disponível.");
+  if (!codec || (audioConfig && !(await canEncodeAudio(mp4 ? "aac" : "opus", audioConfig)))) {
+    throw new Error("Este navegador não conseguiu gerar a versão em vídeo. O WebP continua disponível.");
   }
 
   const { canvas, context } = makeCanvas();
@@ -178,29 +179,31 @@ async function soundVideo(request: RenderRequest, audio: AudioBuffer, container:
   const target = new BufferTarget();
   const writer = new Output({ format, target });
   const image = new CanvasSource(canvas, { codec, bitrate: videoConfig.bitrate });
-  const sound = new AudioBufferSource({ codec: mp4 ? "aac" : "opus", bitrate: audioConfig.bitrate });
+  const sound = audioConfig && new AudioBufferSource({ codec: mp4 ? "aac" : "opus", bitrate: audioConfig.bitrate });
   writer.addVideoTrack(image);
-  writer.addAudioTrack(sound);
+  if (sound) writer.addAudioTrack(sound);
   const cancel = () => { void writer.cancel().catch(() => {}); };
   request.signal.addEventListener("abort", cancel, { once: true });
   try {
     request.signal.throwIfAborted();
     await writer.start();
-    // Both codecs pad their final packet. Leave room for padding inside the selected interval.
-    const packetSamples = mp4 ? 1024 : Math.round(audio.sampleRate * 0.02);
-    const audioLength = Math.max(packetSamples, Math.floor(audio.length / packetSamples) * packetSamples - (mp4 ? 0 : packetSamples));
-    const encodableAudio = new AudioBuffer({ length: audioLength, numberOfChannels: audio.numberOfChannels, sampleRate: audio.sampleRate });
-    for (let channel = 0; channel < audio.numberOfChannels; channel++) {
-      encodableAudio.getChannelData(channel).set(audio.getChannelData(channel).subarray(0, audioLength));
+    if (audio && sound) {
+      // Both codecs pad their final packet. Leave room for padding inside the selected interval.
+      const packetSamples = mp4 ? 1024 : Math.round(audio.sampleRate * 0.02);
+      const audioLength = Math.max(packetSamples, Math.floor(audio.length / packetSamples) * packetSamples - (mp4 ? 0 : packetSamples));
+      const encodableAudio = new AudioBuffer({ length: audioLength, numberOfChannels: audio.numberOfChannels, sampleRate: audio.sampleRate });
+      for (let channel = 0; channel < audio.numberOfChannels; channel++) {
+        encodableAudio.getChannelData(channel).set(audio.getChannelData(channel).subarray(0, audioLength));
+      }
+      await sound.add(encodableAudio);
+      sound.close();
     }
-    await sound.add(encodableAudio);
-    sound.close();
-    const frames = frameSchedule(request.duration, request.visual.kind === "image" ? 6 : 24);
+    const frames = frameSchedule(request.duration, request.visual.kind === "image" ? 6 : audio ? 24 : 15);
     await withFrames(request, frames, async (source, width, height, index) => {
       paint(context, source, width, height, request.crop, true);
       const frame = frames[index];
       await image.add(frame.at / 1000, frame.duration / 1000);
-      request.onProgress(0.72 + (index + 1) / frames.length * 0.25, "Codificando a versão com áudio");
+      request.onProgress(0.72 + (index + 1) / frames.length * 0.25, "Codificando a versão em vídeo");
     });
     image.close();
     request.signal.throwIfAborted();
@@ -212,10 +215,10 @@ async function soundVideo(request: RenderRequest, audio: AudioBuffer, container:
       const [video, audioTrack, duration] = await Promise.all([
         verification.getPrimaryVideoTrack(), verification.getPrimaryAudioTrack(), verification.computeDuration(),
       ]);
-      if (!video || !audioTrack || await video.getDisplayWidth() !== SIDE || await video.getDisplayHeight() !== SIDE ||
-          await audioTrack.computeDuration() > request.duration + 0.002 ||
+      if (!video || Boolean(audioTrack) !== Boolean(audio) || await video.getDisplayWidth() !== SIDE || await video.getDisplayHeight() !== SIDE ||
+          (audioTrack && await audioTrack.computeDuration() > request.duration + 0.002) ||
           Math.abs(duration - request.duration) > 0.015 || duration > MAX_CLIP + 0.002) {
-        throw new Error("O vídeo com áudio não passou na validação.");
+        throw new Error("O vídeo exportado não passou na validação.");
       }
     } finally {
       verification.dispose();
@@ -239,16 +242,16 @@ export async function renderSticker(request: RenderRequest): Promise<Rendered> {
   request.onProgress(0.72, request.audio ? "Sincronizando o áudio" : "Validando o arquivo");
   let video: Blob | undefined;
   let audioWarning: string | undefined;
-  if (request.audio) {
+  if (request.audio || animated) {
     try {
-      video = await soundVideo(request, request.audio, "mp4");
+      video = await exportVideo(request, "mp4");
     } catch {
       request.signal.throwIfAborted();
       try {
-        video = await soundVideo(request, request.audio, "webm");
+        video = await exportVideo(request, "webm");
       } catch (error) {
         request.signal.throwIfAborted();
-        audioWarning = error instanceof Error ? error.message : "A versão com áudio não pôde ser criada.";
+        audioWarning = error instanceof Error ? error.message : "A versão em vídeo não pôde ser criada.";
       }
     }
   }

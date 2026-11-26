@@ -235,7 +235,6 @@ input[type="range"]:not(.handle), input[type="radio"] { accent-color: var(--link
 .player-data .wave { height: 27px; }
 .player-data small { font-variant-numeric: tabular-nums; }
 .result-panel { padding: 24px; display: grid; gap: 13px; }
-.result-status { display: grid; gap: 6px; padding: 10px 12px; border-radius: 10px; background: var(--pale); overflow-wrap: anywhere; }
 .badge { display: inline-flex; align-items: center; gap: 7px; background: var(--soft-blue); color: var(--link); border-radius: 99px; padding: 7px 13px; width: fit-content; font-size: .875rem; font-weight: 650; }
 .result-panel h2, .state-card h2 { font-size: 1.75rem; line-height: 1.25; }
 .result-panel p, .state-card p { color: var(--muted); line-height: 1.45; }

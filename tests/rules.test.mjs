@@ -46,15 +46,30 @@ test("compartilhar com o bot entrega o vídeo ao sistema e respeita o cancelamen
     share: async (data) => calls.push(data),
   };
   Object.defineProperty(globalThis, "navigator", { configurable: true, value: navigator });
-  assert.equal(await rules.shareVideo(video, "memep3-com-audio.mp4"), "shared");
+  assert.equal(await rules.shareStickerFile(video, "memep3-com-audio.mp4"), "shared");
   assert.equal(calls[0].files[0].name, "memep3-com-audio.mp4");
   assert.equal(await calls[0].files[0].text(), "mp4");
   assert.equal(calls[0].text, rules.shareDescription());
   navigator.share = async () => { throw new DOMException("cancelado", "AbortError"); };
-  assert.equal(await rules.shareVideo(video, "memep3-com-audio.mp4"), "cancelled");
+  assert.equal(await rules.shareStickerFile(video, "memep3-com-audio.mp4"), "cancelled");
   navigator.canShare = () => false;
-  assert.equal(await rules.shareVideo(video, "memep3-com-audio.mp4"), "unavailable");
+  assert.equal(await rules.shareStickerFile(video, "memep3-com-audio.mp4"), "unavailable");
   assert.equal(calls.length, 1);
+});
+
+test("compartilhar WebP com o bot envia a figurinha sem legenda", async (context) => {
+  const original = Object.getOwnPropertyDescriptor(globalThis, "navigator");
+  context.after(() => Object.defineProperty(globalThis, "navigator", original));
+  const calls = [];
+  Object.defineProperty(globalThis, "navigator", { configurable: true, value: {
+    canShare: ({ files }) => files[0].type === "image/webp",
+    share: async (data) => calls.push(data),
+  } });
+  const sticker = new Blob(["webp"], { type: "image/webp" });
+  assert.equal(await rules.shareStickerFile(sticker, "memep3.webp"), "shared");
+  assert.equal(calls[0].files[0].name, "memep3.webp");
+  assert.equal(await calls[0].files[0].text(), "webp");
+  assert.equal("text" in calls[0], false);
 });
 
 test("a descrição do compartilhamento usa o link configurado ou o provisório", () => {

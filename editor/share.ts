@@ -45,11 +45,12 @@ export async function shareSite(url: string) {
   return address.href;
 }
 
-export async function shareVideo(video: Blob, filename: string) {
-  const files = [new File([video], filename, { type: video.type })];
+export async function shareStickerFile(blob: Blob, filename: string) {
+  const files = [new File([blob], filename, { type: blob.type })];
   try {
     if (!navigator.share || !navigator.canShare?.({ files })) return "unavailable";
-    await navigator.share({ files, text: shareDescription() });
+    // Felku renders captions on photos. Keep the site address off the sticker.
+    await navigator.share(blob.type.startsWith("video/") ? { files, text: shareDescription() } : { files });
     return "shared";
   } catch (error) {
     return cancelled(error) ? "cancelled" : "unavailable";

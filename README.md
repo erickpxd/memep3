@@ -20,11 +20,11 @@ Abra http://localhost:3000. Use HTTPS em produção para permitir microfone, com
 3. Mantenha o áudio original de um vídeo compatível, envie um arquivo de áudio, grave pelo microfone ou selecione **Sem áudio**. O recorte de áudio pode ser posicionado dentro da animação.
 4. Reproduza a prévia, gere o resultado e escolha o formato para baixar ou compartilhar.
 
-O botão **Compartilhar** no cabeçalho envia o link da página. No resultado, **Adicionar ao WhatsApp** salva o arquivo para usar em **Figurinhas → Criar → Recentes**. O formato padrão é o WebP sem áudio. Se você escolher o MP4, a janela de salvar sugere a pasta de vídeos quando o navegador oferece esse recurso. A criação com som depende de uma conta habilitada no WhatsApp Beta para Android.
+O botão **Compartilhar** no cabeçalho envia o link da página. No resultado, **Baixar** salva o WebP por padrão. Quando também há uma versão em vídeo, escolha o formato na prévia. Para MP4 com áudio, a janela de salvar sugere a pasta de vídeos quando o navegador oferece esse recurso.
 
-As instruções para adicionar ao WhatsApp incluem o endereço do MemeP3 como descrição para copiar. Defina `NEXT_PUBLIC_MEMEP3_URL` antes do build para usar um domínio diferente de `memep3.vercel.app`.
+**Enviar ao bot** abre o compartilhamento do dispositivo com o arquivo pronto. Escolha a conversa privada do [Felku](https://felku.com.br/felku/bot-de-figurinhas) e confirme o envio. O bot recebe um WebP para imagens e um vídeo para as animações, que são convertidas sem som. Em navegadores sem compartilhamento de arquivos, a ação abre a conversa do Felku para você anexar o arquivo de **Baixar**. Na primeira conversa, o bot pede que você aceite os termos de uso.
 
-Se o resultado incluir um vídeo, **Vídeo para o bot do WhatsApp** abre o compartilhamento do dispositivo com o arquivo pronto. Escolha a conversa privada do [Felku](https://felku.com.br/felku/bot-de-figurinhas) e confirme o envio. O Felku recebe o vídeo e devolve uma figurinha animada sem som. Se o navegador não oferecer compartilhamento de arquivos, use **Baixar** e **Abrir conversa do Felku**.
+O compartilhamento de vídeo inclui o endereço do MemeP3 na descrição. Defina `NEXT_PUBLIC_MEMEP3_URL` antes do build para usar um domínio diferente de `memep3.vercel.app`.
 
 - **WebP de figurinha** tem 512 × 512 px e até 100 KB para imagens estáticas, ou 500 KB e 10 segundos para animações. O arquivo fica sem áudio e segue os limites públicos das [figurinhas do WhatsApp](https://github.com/WhatsApp/stickers/blob/main/Android/README.md).
 - **Vídeo com áudio** sai em MP4 quando há suporte a H.264 e AAC, ou WebM quando há suporte a VP8/VP9 e Opus. A importação como figurinha depende das opções disponíveis no WhatsApp. A geração de figurinhas sonoras nativas exige uma interface pública que o WhatsApp ainda não documenta para sites.
