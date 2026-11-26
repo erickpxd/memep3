@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -104,7 +105,9 @@ public final class MainActivity extends Activity {
                 runOnUiThread(() -> {
                     if (isDestroyed()) return;
                     importButton.setEnabled(true);
-                    status.setText("Não foi possível importar. Escolha um arquivo .memep3pack válido.");
+                    status.setText(error instanceof PackStore.CapacityException
+                        ? "Limite de 10 pacotes. Mantenha o nome de um pacote pressionado para removê-lo."
+                        : "Não foi possível importar. Escolha um arquivo .memep3pack válido.");
                 });
             }
         });
@@ -122,6 +125,13 @@ public final class MainActivity extends Activity {
         for (PackStore.Pack pack : saved) {
             TextView name = new TextView(this);
             name.setText(pack.name() + " · " + pack.count() + " figurinhas");
+            name.setOnLongClickListener(view -> {
+                new AlertDialog.Builder(this).setTitle("Remover pacote?")
+                    .setMessage("As figurinhas deste pacote podem deixar de aparecer no WhatsApp.")
+                    .setNegativeButton("Cancelar", null)
+                    .setPositiveButton("Remover", (dialog, which) -> removePack(pack)).show();
+                return true;
+            });
             packs.addView(name);
             Button add = new Button(this);
             add.setText("Adicionar ao WhatsApp");
@@ -130,6 +140,22 @@ public final class MainActivity extends Activity {
             packs.addView(add);
             if (pack.id().equals(importedId)) add.requestFocus();
         }
+    }
+
+    private void removePack(PackStore.Pack pack) {
+        worker.execute(() -> {
+            try {
+                PackStore.remove(this, pack);
+                List<PackStore.Pack> saved = PackStore.list(this);
+                runOnUiThread(() -> {
+                    if (isDestroyed()) return;
+                    renderPacks(saved, null);
+                    status.setText("Pacote removido.");
+                });
+            } catch (IOException error) {
+                runOnUiThread(() -> { if (!isDestroyed()) status.setText("Não foi possível remover o pacote."); });
+            }
+        });
     }
 
     private void openWhatsApp(PackStore.Pack pack) {

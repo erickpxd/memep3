@@ -12,6 +12,7 @@ import android.os.ParcelFileDescriptor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.Objects;
 
 public final class StickerProvider extends ContentProvider {
     private static final String[] METADATA = {
@@ -25,7 +26,7 @@ public final class StickerProvider extends ContentProvider {
     @Override public boolean onCreate() { return true; }
 
     @Override public Cursor query(Uri uri, String[] projection, String selection, String[] args, String sort) {
-        Context context = requireContext();
+        Context context = Objects.requireNonNull(getContext());
         List<String> path = uri.getPathSegments();
         if (!path.isEmpty() && path.size() <= 2 && "metadata".equals(path.get(0))) {
             MatrixCursor cursor = new MatrixCursor(METADATA);
@@ -55,7 +56,7 @@ public final class StickerProvider extends ContentProvider {
         String fileName = path.get(2);
         File folder;
         try {
-            folder = PackStore.directory(requireContext(), path.get(1));
+            folder = PackStore.directory(Objects.requireNonNull(getContext()), path.get(1));
         } catch (IllegalArgumentException error) {
             throw new FileNotFoundException();
         }

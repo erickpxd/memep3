@@ -21,9 +21,11 @@ import java.util.UUID;
 
 final class PackStore {
     static final String TRAY = "tray.png";
+    static final int MAX_PACKS = 10;
     private static final int MAX_BYTES = 21_000_000;
 
     record Pack(String id, String name, boolean animated, int count) {}
+    static final class CapacityException extends IOException {}
 
     private PackStore() {}
 
@@ -49,7 +51,7 @@ final class PackStore {
         }
     }
 
-    private static Pack save(Context context, JSONObject data) throws Exception {
+    private static synchronized Pack save(Context context, JSONObject data) throws Exception {
         String id = data.getString("identifier");
         File target = directory(context, id);
         String name = data.getString("name").trim();
@@ -61,6 +63,7 @@ final class PackStore {
             throw new IOException("Escolha um pacote do MemeP3 com 3 a 30 figurinhas.");
         }
         if (target.isDirectory()) return read(target);
+        if (list(context).size() >= MAX_PACKS) throw new CapacityException();
 
         Files.createDirectories(root(context).toPath());
         File temporary = new File(root(context), "." + UUID.randomUUID());
@@ -105,6 +108,17 @@ final class PackStore {
         byte[] metadata = Files.readAllBytes(new File(folder, "meta.json").toPath());
         JSONObject info = new JSONObject(new String(metadata, StandardCharsets.UTF_8));
         return new Pack(folder.getName(), info.getString("name"), info.getBoolean("animated"), info.getInt("count"));
+    }
+
+    static synchronized void remove(Context context, Pack pack) throws IOException {
+        File original = directory(context, pack.id());
+        if (!original.isDirectory()) return;
+        File removed = new File(root(context), "." + UUID.randomUUID());
+        Files.move(original.toPath(), removed.toPath(), StandardCopyOption.ATOMIC_MOVE);
+        File[] files = removed.listFiles();
+        if (files == null) return;
+        for (File file : files) Files.deleteIfExists(file.toPath());
+        Files.deleteIfExists(removed.toPath());
     }
 
     private static File root(Context context) {
