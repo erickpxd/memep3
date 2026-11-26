@@ -22,14 +22,14 @@ Abra http://localhost:3000. Use HTTPS em produção para permitir microfone, com
 
 O botão **Compartilhar** no cabeçalho envia o link da página. No resultado, **Baixar** salva o WebP por padrão. Quando também há uma versão em vídeo, escolha o formato na prévia. Para MP4 com áudio, a janela de salvar sugere a pasta de vídeos quando o navegador oferece esse recurso.
 
-**Enviar ao bot** abre o compartilhamento do dispositivo com o arquivo pronto. Escolha a conversa privada do [Felku](https://felku.com.br/felku/bot-de-figurinhas) e confirme o envio. O bot recebe um WebP para imagens e um vídeo para as animações, que são convertidas sem som. Em navegadores sem compartilhamento de arquivos, a ação abre a conversa do Felku para você anexar o arquivo de **Baixar**. Na primeira conversa, o bot pede que você aceite os termos de uso.
+**Enviar ao bot** baixa o vídeo com áudio e abre o [figurinhas.live](https://figurinhas.live/) em outra aba. Envie o vídeo exportado ao serviço para receber a figurinha sonora no grupo de entregas do WhatsApp. Para um resultado sem áudio, a ação abre o compartilhamento do dispositivo para a conversa privada do [Felku](https://felku.com.br/felku/bot-de-figurinhas). Em navegadores sem compartilhamento de arquivos, a ação abre a conversa do Felku para você anexar o arquivo de **Baixar**.
 
-O compartilhamento de vídeo inclui o endereço do MemeP3 na descrição. Defina `NEXT_PUBLIC_MEMEP3_URL` antes do build para usar um domínio diferente de `memep3.vercel.app`.
+O compartilhamento de vídeo com o Felku inclui o endereço do MemeP3 na descrição. Defina `NEXT_PUBLIC_MEMEP3_URL` antes do build para usar um domínio diferente de `memep3.vercel.app`.
 
 - **WebP de figurinha** tem 512 × 512 px e até 100 KB para imagens estáticas, ou 500 KB e 10 segundos para animações. O arquivo fica sem áudio e segue os limites públicos das [figurinhas do WhatsApp](https://github.com/WhatsApp/stickers/blob/main/Android/README.md).
 - **Vídeo com áudio** sai em MP4 quando há suporte a H.264 e AAC, ou WebM quando há suporte a VP8/VP9 e Opus. A importação como figurinha depende das opções disponíveis no WhatsApp. A geração de figurinhas sonoras nativas exige uma interface pública que o WhatsApp ainda não documenta para sites.
 
-O editor processa e exporta os arquivos no dispositivo. Se você enviar o vídeo ao bot, o Felku faz a conversão dele a partir da mensagem recebida no WhatsApp. O editor usa Web Audio para recorte e prévia, Mediabunny para leitura e escrita de mídia e gifuct-js para compor quadros GIF. Quando o navegador não oferece codificação nativa em WebP ou AAC, o editor carrega os codecs WebAssembly locais sob demanda. O navegador só solicita acesso ao microfone ao iniciar uma gravação.
+O editor processa e exporta os arquivos no dispositivo. A conversão pelo bot começa quando você envia o arquivo ao serviço escolhido. O editor usa Web Audio para recorte e prévia, Mediabunny para leitura e escrita de mídia e gifuct-js para compor quadros GIF. Quando o navegador não oferece codificação nativa em WebP ou AAC, o editor carrega os codecs WebAssembly locais sob demanda. O navegador só solicita acesso ao microfone ao iniciar uma gravação.
 
 ## Extensão
 
