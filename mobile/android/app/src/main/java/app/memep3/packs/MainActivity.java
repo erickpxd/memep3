@@ -39,16 +39,16 @@ public final class MainActivity extends Activity {
         setContentView(scroll);
 
         TextView title = new TextView(this);
-        title.setText("MemeP3");
+        title.setText(R.string.app_name);
         title.setTextSize(30);
         title.setAccessibilityHeading(true);
         page.addView(title);
         TextView description = new TextView(this);
-        description.setText("Abra um pacote baixado no MemeP3 e adicione as figurinhas ao WhatsApp.");
+        description.setText(R.string.description);
         page.addView(description);
 
         importButton = new Button(this);
-        importButton.setText("Importar pacote");
+        importButton.setText(R.string.import_pack);
         importButton.setOnClickListener(view -> chooseFile());
         page.addView(importButton);
 
@@ -85,12 +85,12 @@ public final class MainActivity extends Activity {
         if (request == ENABLE_PACK) {
             String error = data == null ? null : data.getStringExtra("validation_error");
             if (error != null && !error.isEmpty()) status.setText(error);
-            else if (result == RESULT_OK) status.setText("Pacote adicionado ao WhatsApp.");
+            else if (result == RESULT_OK) status.setText(R.string.pack_added);
             return;
         }
         if (request != CHOOSE_PACK || result != RESULT_OK || data == null || data.getData() == null) return;
         Uri uri = data.getData();
-        status.setText("Importando pacote…");
+        status.setText(R.string.importing);
         importButton.setEnabled(false);
         worker.execute(() -> {
             try {
@@ -98,7 +98,7 @@ public final class MainActivity extends Activity {
                 runOnUiThread(() -> {
                     if (isDestroyed()) return;
                     importButton.setEnabled(true);
-                    status.setText("Pacote pronto. Toque em Adicionar ao WhatsApp para confirmar.");
+                    status.setText(R.string.pack_ready);
                     renderPacks(PackStore.list(this), pack.id());
                 });
             } catch (Exception error) {
@@ -106,8 +106,8 @@ public final class MainActivity extends Activity {
                     if (isDestroyed()) return;
                     importButton.setEnabled(true);
                     status.setText(error instanceof PackStore.CapacityException
-                        ? "Limite de 10 pacotes. Mantenha o nome de um pacote pressionado para removê-lo."
-                        : "Não foi possível importar. Escolha um arquivo .memep3pack válido.");
+                        ? R.string.capacity
+                        : R.string.invalid_pack);
                 });
             }
         });
@@ -124,18 +124,18 @@ public final class MainActivity extends Activity {
         packs.removeAllViews();
         for (PackStore.Pack pack : saved) {
             TextView name = new TextView(this);
-            name.setText(pack.name() + " · " + pack.count() + " figurinhas");
+            name.setText(getString(R.string.pack_title, pack.name(), pack.count()));
             name.setOnLongClickListener(view -> {
-                new AlertDialog.Builder(this).setTitle("Remover pacote?")
-                    .setMessage("As figurinhas deste pacote podem deixar de aparecer no WhatsApp.")
-                    .setNegativeButton("Cancelar", null)
-                    .setPositiveButton("Remover", (dialog, which) -> removePack(pack)).show();
+                new AlertDialog.Builder(this).setTitle(R.string.confirm_remove)
+                    .setMessage(R.string.remove_details)
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(R.string.remove, (dialog, which) -> removePack(pack)).show();
                 return true;
             });
             packs.addView(name);
             Button add = new Button(this);
-            add.setText("Adicionar ao WhatsApp");
-            add.setContentDescription("Adicionar " + pack.name() + " ao WhatsApp");
+            add.setText(R.string.add_to_whatsapp);
+            add.setContentDescription(getString(R.string.add_pack_to_whatsapp, pack.name()));
             add.setOnClickListener(view -> openWhatsApp(pack));
             packs.addView(add);
             if (pack.id().equals(importedId)) add.requestFocus();
@@ -150,10 +150,10 @@ public final class MainActivity extends Activity {
                 runOnUiThread(() -> {
                     if (isDestroyed()) return;
                     renderPacks(saved, null);
-                    status.setText("Pacote removido.");
+                    status.setText(R.string.pack_removed);
                 });
             } catch (IOException error) {
-                runOnUiThread(() -> { if (!isDestroyed()) status.setText("Não foi possível remover o pacote."); });
+                runOnUiThread(() -> { if (!isDestroyed()) status.setText(R.string.remove_error); });
             }
         });
     }
@@ -173,11 +173,11 @@ public final class MainActivity extends Activity {
             }
         }
         if (targets.isEmpty()) {
-            status.setText("Instale ou atualize o WhatsApp para adicionar o pacote.");
+            status.setText(R.string.whatsapp_missing);
         } else if (targets.size() == 1) {
             launch(targets.get(0));
         } else {
-            new AlertDialog.Builder(this).setTitle("Escolha o WhatsApp")
+            new AlertDialog.Builder(this).setTitle(R.string.choose_whatsapp)
                 .setItems(labels.toArray(new String[0]), (dialog, which) -> launch(targets.get(which))).show();
         }
     }
@@ -187,7 +187,7 @@ public final class MainActivity extends Activity {
             status.setText("");
             startActivityForResult(intent, ENABLE_PACK);
         } catch (ActivityNotFoundException error) {
-            status.setText("Não foi possível abrir o WhatsApp.");
+            status.setText(R.string.whatsapp_open_error);
         }
     }
 

@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">MemeP3</string>
+    <string name="description">Abra um pacote baixado no MemeP3 e adicione as figurinhas ao WhatsApp.</string>
+    <string name="import_pack">Importar pacote</string>
+    <string name="pack_added">Pacote adicionado ao WhatsApp.</string>
+    <string name="importing">Importando pacote…</string>
+    <string name="pack_ready">Pacote pronto. Toque em Adicionar ao WhatsApp para confirmar.</string>
+    <string name="capacity">Limite de 10 pacotes. Mantenha o nome de um pacote pressionado para removê-lo.</string>
+    <string name="invalid_pack">Não foi possível importar. Escolha um arquivo .memep3pack válido.</string>
+    <string name="pack_title">%1$s · %2$d figurinhas</string>
+    <string name="confirm_remove">Remover pacote?</string>
+    <string name="remove_details">As figurinhas deste pacote podem deixar de aparecer no WhatsApp.</string>
+    <string name="cancel">Cancelar</string>
+    <string name="remove">Remover</string>
+    <string name="add_to_whatsapp">Adicionar ao WhatsApp</string>
+    <string name="add_pack_to_whatsapp">Adicionar %1$s ao WhatsApp</string>
+    <string name="pack_removed">Pacote removido.</string>
+    <string name="remove_error">Não foi possível remover o pacote.</string>
+    <string name="whatsapp_missing">Instale ou atualize o WhatsApp para adicionar o pacote.</string>
+    <string name="choose_whatsapp">Escolha o WhatsApp</string>
+    <string name="whatsapp_open_error">Não foi possível abrir o WhatsApp.</string>
+</resources>
