@@ -20,7 +20,6 @@ type Sound = { file: File; buffer: AudioBuffer; recorded: boolean };
 type Output = Rendered & { stickerUrl: string; videoUrl?: string; videoFilename?: string };
 type ResultType = "video" | "sticker";
 type ResultFile = { blob: Blob; url: string; name: string };
-const soundStickerService = "https://figurinhas.live/#stage";
 
 const choices = [
   { mode: "original", icon: "music", title: "Manter áudio original", detail: "Usa o som que já está no vídeo." },
@@ -46,8 +45,11 @@ function download(url: string, name: string) {
   link.click();
 }
 
-function DownloadResult({ file, chooseLocation }: { file: ResultFile; chooseLocation: boolean }) {
+function DownloadResult({ file, chooseLocation, forWhatsApp = false }: { file: ResultFile; chooseLocation: boolean; forWhatsApp?: boolean }) {
   const [status, setStatus] = useState<"idle" | "saving" | "error">("idle");
+  const label = forWhatsApp ? "Salvar no WhatsApp" : "Baixar";
+  const className = `button ${forWhatsApp ? "primary" : "outline"}`;
+  const content = <>{!forWhatsApp && <Icon name="download" />}{label}</>;
 
   async function save() {
     setStatus("saving");
@@ -61,9 +63,9 @@ function DownloadResult({ file, chooseLocation }: { file: ResultFile; chooseLoca
   }
 
   return chooseLocation ? <>
-    <button type="button" className="button outline" disabled={status === "saving"} onClick={() => void save()}><Icon name="download" />Baixar</button>
+    <button type="button" className={className} disabled={status === "saving"} onClick={() => void save()}>{content}</button>
     {status === "error" && <p className="hint" role="alert">Não foi possível salvar no local escolhido. Tente novamente.</p>}
-  </> : <a className="button outline" href={file.url} download={file.name}><Icon name="download" />Baixar</a>;
+  </> : <a className={className} href={file.url} download={file.name}>{content}</a>;
 }
 
 function Create({ onClick, disabled, label = "Criar minha figurinha" }: { onClick?: () => void; disabled?: boolean; label?: string }) {
@@ -499,15 +501,12 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
             <span className="badge"><Icon name="check" />Figurinha criada</span>
             <h2>Ficou a sua cara!</h2>
             <div className="result-info"><div><strong>{resultFile.name}</strong><small>{(resultFile.blob.size / 1000).toFixed(1)} KB{output.animated || resultType !== "sticker" ? ` · ${timeLabel(output.duration, 1)}` : ""}</small></div></div>
+            {prepared && videoFile
+              ? <DownloadResult file={videoFile} chooseLocation={videoFile.blob.type.startsWith("video/mp4")} forWhatsApp />
+              : <button type="button" className="button primary" onClick={addToPack}>Salvar no WhatsApp</button>}
             <DownloadResult key={resultFile.url} file={resultFile} chooseLocation={Boolean(prepared && resultFile.blob.type.startsWith("video/mp4"))} />
-            {prepared && videoFile ? <>
-              <a className="button primary" href={soundStickerService} target="_blank" rel="noopener noreferrer" onClick={() => {
-                setResultType("video");
-                download(videoFile.url, videoFile.name);
-              }}>Enviar ao bot</a>
-              <p className="hint">O botão baixa o vídeo e abre a área de envio. Selecione o vídeo baixado, confirme o trecho e informe seu número. O bot entrega a figurinha no grupo do WhatsApp.</p>
-            </> : <button type="button" className="button primary" onClick={addToPack}>Adicionar ao WhatsApp</button>}
             <button className="button outline" onClick={reset}>Criar outra figurinha</button>
+            {prepared && videoFile && <p className="hint">Salve o vídeo e abra <strong>Figurinhas → Criar</strong> no WhatsApp. Selecione o vídeo e mantenha o áudio se o editor mostrar o ícone de som.</p>}
             {output.audioWarning && <p className="hint" role="status">{output.audioWarning}</p>}
           </section>
         </div>

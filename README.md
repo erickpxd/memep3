@@ -22,11 +22,11 @@ Abra http://localhost:3000. Use HTTPS em produção para permitir microfone, com
 
 O botão **Compartilhar** no cabeçalho envia o link da página. No resultado, **Baixar** salva o WebP por padrão. Quando também há uma versão em vídeo, escolha o formato na prévia. Para MP4 com áudio, a janela de salvar sugere a pasta de vídeos quando o navegador oferece esse recurso.
 
-**Enviar ao bot** baixa o vídeo com áudio e abre a [área de envio do figurinhas.live](https://figurinhas.live/#stage) em outra aba. Selecione o vídeo exportado e informe seu número para receber a figurinha sonora no grupo de entregas do WhatsApp.
+Para resultados com áudio, **Salvar no WhatsApp** salva o vídeo para seleção em **Figurinhas → Criar** no WhatsApp. Manter a faixa sonora depende da disponibilidade do botão de som no editor do WhatsApp.
 
 ### Adicionar um pacote sem áudio ao WhatsApp
 
-1. Gere uma figurinha sem áudio e escolha **Adicionar ao WhatsApp** na tela de resultado. Repita para reunir de 3 a 30 figurinhas. O WhatsApp exige pacotes separados para estáticas e animadas.
+1. Gere uma figurinha sem áudio e escolha **Salvar no WhatsApp** na tela de resultado. Repita para reunir de 3 a 30 figurinhas. O WhatsApp exige pacotes separados para estáticas e animadas.
 2. Dê um nome ao pacote, escolha **Preparar pacote** e baixe o arquivo `.memep3pack`. Mantenha a página aberta enquanto monta o pacote.
 3. Com o app complementar instalado no celular, use **Abrir app MemeP3** e selecione o arquivo em **Importar pacote**.
 4. No app MemeP3, toque em **Adicionar ao WhatsApp** e confirme no WhatsApp. As figurinhas ficam disponíveis na bandeja de figurinhas da conversa.
@@ -39,7 +39,7 @@ O site monta o pacote localmente. O importador usa a integração oficial de pac
 - **WebP de figurinha** tem 512 × 512 px e até 100 KB para imagens estáticas, ou 500 KB e 10 segundos para animações. O arquivo fica sem áudio e segue os limites públicos das [figurinhas do WhatsApp](https://github.com/WhatsApp/stickers/blob/main/Android/README.md).
 - **Vídeo com áudio** sai em MP4 quando há suporte a H.264 e AAC, ou WebM quando há suporte a VP8/VP9 e Opus. A importação como figurinha depende das opções disponíveis no WhatsApp. A geração de figurinhas sonoras nativas exige uma interface pública que o WhatsApp ainda não documenta para sites.
 
-O editor processa e exporta os arquivos no dispositivo. A conversão pelo bot começa quando você envia o arquivo ao serviço escolhido. O editor usa Web Audio para recorte e prévia, Mediabunny para leitura e escrita de mídia e gifuct-js para compor quadros GIF. Quando o navegador não oferece codificação nativa em WebP ou AAC, o editor carrega os codecs WebAssembly locais sob demanda. O navegador só solicita acesso ao microfone ao iniciar uma gravação.
+O editor processa e exporta os arquivos no dispositivo. O editor usa Web Audio para recorte e prévia, Mediabunny para leitura e escrita de mídia e gifuct-js para compor quadros GIF. Quando o navegador não oferece codificação nativa em WebP ou AAC, o editor carrega os codecs WebAssembly locais sob demanda. O navegador só solicita acesso ao microfone ao iniciar uma gravação.
 
 ## Extensão
 
