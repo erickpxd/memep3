@@ -74,6 +74,7 @@ public final class MainActivity extends Activity {
     }
 
     private void chooseFile() {
+        if (!importButton.isEnabled()) return;
         Intent picker = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         picker.setType("*/*");
         picker.addCategory(Intent.CATEGORY_OPENABLE);
@@ -94,12 +95,18 @@ public final class MainActivity extends Activity {
         importButton.setEnabled(false);
         worker.execute(() -> {
             try {
-                PackStore.Pack pack = PackStore.importFile(this, uri);
+                PackStore.ImportResult imported = PackStore.importFile(this, uri);
+                List<PackStore.Pack> saved = PackStore.list(this);
                 runOnUiThread(() -> {
                     if (isDestroyed()) return;
                     importButton.setEnabled(true);
-                    status.setText(R.string.pack_ready);
-                    renderPacks(PackStore.list(this), pack.id());
+                    if (imported.pack() != null) {
+                        status.setText(R.string.pack_ready);
+                        renderPacks(saved, imported.pack().id());
+                    } else {
+                        status.setText(getString(imported.alreadyInDraft() ? R.string.already_in_draft : R.string.sticker_in_draft,
+                            imported.draftCount(), getString(imported.animated() ? R.string.animated_pack_name : R.string.static_pack_name)));
+                    }
                 });
             } catch (Exception error) {
                 runOnUiThread(() -> {

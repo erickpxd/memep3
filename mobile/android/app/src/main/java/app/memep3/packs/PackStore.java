@@ -1,7 +1,9 @@
 package app.memep3.packs;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.util.Base64;
 
@@ -15,8 +17,12 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 final class PackStore {
@@ -25,6 +31,7 @@ final class PackStore {
     private static final int MAX_BYTES = 21_000_000;
 
     record Pack(String id, String name, boolean animated, int count) {}
+    record ImportResult(Pack pack, int draftCount, boolean animated, boolean alreadyInDraft) {}
     static final class CapacityException extends IOException {}
 
     private PackStore() {}
@@ -38,7 +45,7 @@ final class PackStore {
         return "sticker-" + index + ".webp";
     }
 
-    static Pack importFile(Context context, Uri uri) throws Exception {
+    static ImportResult importFile(Context context, Uri uri) throws Exception {
         try (InputStream input = context.getContentResolver().openInputStream(uri)) {
             if (input == null) throw new IOException("Não foi possível abrir o arquivo.");
             ByteArrayOutputStream content = new ByteArrayOutputStream();
@@ -47,7 +54,77 @@ final class PackStore {
                 if (content.size() + size > MAX_BYTES) throw new IOException("O pacote é grande demais.");
                 content.write(buffer, 0, size);
             }
-            return save(context, new JSONObject(content.toString(StandardCharsets.UTF_8.name())));
+            byte[] data = content.toByteArray();
+            if (data.length >= 12 && tag(data, 0, "RIFF") && tag(data, 8, "WEBP")) {
+                return addSticker(context, data);
+            }
+            Pack pack = save(context, new JSONObject(new String(data, StandardCharsets.UTF_8)));
+            return new ImportResult(pack, 0, pack.animated(), false);
+        }
+    }
+
+    private static synchronized ImportResult addSticker(Context context, byte[] sticker) throws Exception {
+        if (sticker.length > 500_000) throw new IOException("WebP acima do limite.");
+        boolean animated = isAnimated(sticker);
+        if (!animated && sticker.length > 100_000) throw new IOException("WebP acima do limite.");
+        checkImage(sticker, "image/webp", 512);
+        if (list(context).size() >= MAX_PACKS) throw new CapacityException();
+
+        File folder = new File(context.getFilesDir(), animated ? "draft-animated" : "draft-static");
+        Files.createDirectories(folder.toPath());
+        byte[] fingerprint = MessageDigest.getInstance("SHA-256").digest(sticker);
+        StringBuilder name = new StringBuilder();
+        for (byte value : fingerprint) name.append(String.format(Locale.ROOT, "%02x", value & 255));
+        File destination = new File(folder, name + ".webp");
+        File[] batch = listDraft(folder);
+        boolean duplicate = destination.isFile();
+        if (batch.length < 3 && !duplicate) {
+            File temporary = File.createTempFile("sticker-", ".tmp", folder);
+            try {
+                Files.write(temporary.toPath(), sticker);
+                Files.move(temporary.toPath(), destination.toPath(), StandardCopyOption.ATOMIC_MOVE);
+            } finally {
+                Files.deleteIfExists(temporary.toPath());
+            }
+            batch = listDraft(folder);
+        }
+        if (batch.length < 3) return new ImportResult(null, batch.length, animated, duplicate);
+
+        JSONArray stickers = new JSONArray();
+        StringBuilder packKey = new StringBuilder();
+        for (File file : batch) {
+            stickers.put(new JSONObject().put("image_data", Base64.encodeToString(Files.readAllBytes(file.toPath()), Base64.NO_WRAP)));
+            packKey.append(file.getName());
+        }
+        JSONObject data = new JSONObject()
+            .put("format", "memep3-pack-v1")
+            .put("identifier", "memep3-" + UUID.nameUUIDFromBytes(packKey.toString().getBytes(StandardCharsets.UTF_8)))
+            .put("name", context.getString(animated ? R.string.animated_pack_name : R.string.static_pack_name))
+            .put("animated_sticker_pack", animated)
+            .put("tray_image", Base64.encodeToString(trayIcon(batch[0]), Base64.NO_WRAP))
+            .put("stickers", stickers);
+        Pack pack = save(context, data);
+        for (File file : batch) file.delete();
+        return new ImportResult(pack, 0, animated, false);
+    }
+
+    private static File[] listDraft(File folder) throws IOException {
+        File[] result = folder.listFiles(file -> file.isFile() && file.getName().endsWith(".webp"));
+        if (result == null) throw new IOException("Não foi possível abrir o rascunho.");
+        Arrays.sort(result, Comparator.comparing(File::getName));
+        return result;
+    }
+
+    private static byte[] trayIcon(File sticker) throws IOException {
+        Bitmap bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(sticker), (decoder, info, source) -> {
+            decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
+            decoder.setTargetSize(96, 96);
+        });
+        try (ByteArrayOutputStream png = new ByteArrayOutputStream()) {
+            if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, png)) throw new IOException("Ícone inválido.");
+            return png.toByteArray();
+        } finally {
+            bitmap.recycle();
         }
     }
 
@@ -75,7 +152,7 @@ final class PackStore {
             for (int index = 0; index < count; index++) {
                 byte[] sticker = decode(stickers.getJSONObject(index).getString("image_data"), animated ? 500_000 : 100_000);
                 checkImage(sticker, "image/webp", 512);
-                checkAnimation(sticker, animated);
+                if (isAnimated(sticker) != animated) throw new IOException("O tipo do WebP não corresponde ao pacote.");
                 Files.write(new File(temporary, stickerName(index)).toPath(), sticker);
             }
             JSONObject metadata = new JSONObject().put("name", name).put("animated", animated).put("count", count);
@@ -141,7 +218,7 @@ final class PackStore {
         }
     }
 
-    private static void checkAnimation(byte[] bytes, boolean animated) throws IOException {
+    private static boolean isAnimated(byte[] bytes) throws IOException {
         if (bytes.length < 20 || !tag(bytes, 0, "RIFF") || !tag(bytes, 8, "WEBP") || little(bytes, 4, 4) != bytes.length - 8) {
             throw new IOException("WebP inválido.");
         }
@@ -161,7 +238,8 @@ final class PackStore {
             }
             offset = (int) end;
         }
-        if (animated ? frames < 2 || duration > 10_000 : frames != 0) throw new IOException("O tipo ou a duração do WebP não corresponde ao pacote.");
+        if (frames == 1 || duration > 10_000) throw new IOException("Animação WebP inválida.");
+        return frames > 0;
     }
 
     private static boolean tag(byte[] bytes, int offset, String text) {

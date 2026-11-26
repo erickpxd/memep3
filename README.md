@@ -22,11 +22,13 @@ Abra http://localhost:3000. Use HTTPS em produção para permitir microfone, com
 
 O botão **Compartilhar** no cabeçalho envia o link da página. No resultado, **Baixar** salva o WebP por padrão. Quando também há uma versão em vídeo, escolha o formato na prévia. Para MP4 com áudio, a janela de salvar sugere a pasta de vídeos quando o navegador oferece esse recurso.
 
-Para resultados com áudio, **Salvar no WhatsApp** salva o vídeo para seleção em **Figurinhas → Criar** no WhatsApp. Manter a faixa sonora depende da disponibilidade do botão de som no editor do WhatsApp.
+No Android, com o importador MemeP3 1.1 instalado, **Salvar no WhatsApp** baixa o WebP e abre o seletor de arquivos do app MemeP3. Selecione o WebP em Downloads. O app reúne três figurinhas diferentes do mesmo tipo e oferece **Adicionar ao WhatsApp**. Esse pacote fica sem áudio. Para exportar o vídeo com áudio, escolha o formato de vídeo na prévia e use **Baixar**.
+
+Nos outros navegadores, para resultados com áudio, **Salvar no WhatsApp** salva o vídeo para seleção em **Figurinhas → Criar** no WhatsApp. Manter a faixa sonora depende da disponibilidade do botão de som no editor do WhatsApp.
 
 ### Adicionar um pacote sem áudio ao WhatsApp
 
-1. Gere uma figurinha sem áudio e escolha **Salvar no WhatsApp** na tela de resultado. Repita para reunir de 3 a 30 figurinhas. O WhatsApp exige pacotes separados para estáticas e animadas.
+1. Para montar o pacote no navegador e transferir ao celular, gere uma figurinha sem áudio e escolha **Salvar no WhatsApp** em um computador ou iPhone. Repita para reunir de 3 a 30 figurinhas. O WhatsApp exige pacotes separados para estáticas e animadas.
 2. Dê um nome ao pacote, escolha **Preparar pacote** e baixe o arquivo `.memep3pack`. Mantenha a página aberta enquanto monta o pacote.
 3. Com o app complementar instalado no celular, use **Abrir app MemeP3** e selecione o arquivo em **Importar pacote**.
 4. No app MemeP3, toque em **Adicionar ao WhatsApp** e confirme no WhatsApp. As figurinhas ficam disponíveis na bandeja de figurinhas da conversa.

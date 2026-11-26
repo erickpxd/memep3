@@ -299,6 +299,7 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
     : undefined;
   const stickerFile = output ? { blob: output.sticker, url: output.stickerUrl, name: "memep3.webp" } : undefined;
   const resultFile = resultType === "video" ? videoFile ?? stickerFile : stickerFile;
+  const useAndroidApp = typeof navigator !== "undefined" && /Android/i.test(navigator.userAgent);
   const stickerVisual = useMemo<Visual | undefined>(() => output ? {
     url: output.stickerUrl, file: new File([output.sticker], "memep3.webp", { type: "image/webp" }),
     mime: "image/webp", kind: output.animated ? "animation" : "image", duration: output.duration,
@@ -482,7 +483,7 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
         </section>
       </>}
 
-      {screen === "success" && output && stickerVisual && resultFile && <>
+      {screen === "success" && output && stickerVisual && resultFile && stickerFile && <>
         <Heading title="Sua figurinha está pronta!" detail="Veja como ficou e compartilhe a diversão." />
         <div className="result-grid">
           <section className="card preview-card">
@@ -501,12 +502,15 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
             <span className="badge"><Icon name="check" />Figurinha criada</span>
             <h2>Ficou a sua cara!</h2>
             <div className="result-info"><div><strong>{resultFile.name}</strong><small>{(resultFile.blob.size / 1000).toFixed(1)} KB{output.animated || resultType !== "sticker" ? ` · ${timeLabel(output.duration, 1)}` : ""}</small></div></div>
-            {prepared && videoFile
+            {useAndroidApp
+              ? <a className="button primary" href="memep3://importar" onClick={() => download(stickerFile.url, stickerFile.name)}>Salvar no WhatsApp</a>
+              : prepared && videoFile
               ? <DownloadResult file={videoFile} chooseLocation={videoFile.blob.type.startsWith("video/mp4")} forWhatsApp />
               : <button type="button" className="button primary" onClick={addToPack}>Salvar no WhatsApp</button>}
             <DownloadResult key={resultFile.url} file={resultFile} chooseLocation={Boolean(prepared && resultFile.blob.type.startsWith("video/mp4"))} />
             <button className="button outline" onClick={reset}>Criar outra figurinha</button>
-            {prepared && videoFile && <p className="hint">Salve o vídeo e abra <strong>Figurinhas → Criar</strong> no WhatsApp. Selecione o vídeo e mantenha o áudio se o editor mostrar o ícone de som.</p>}
+            {useAndroidApp && <p className="hint">Com o app MemeP3 instalado, selecione o WebP baixado para montar seu pacote{prepared ? " sem áudio" : ""}.</p>}
+            {!useAndroidApp && prepared && videoFile && <p className="hint">Salve o vídeo e abra <strong>Figurinhas → Criar</strong> no WhatsApp. Selecione o vídeo e mantenha o áudio se o editor mostrar o ícone de som.</p>}
             {output.audioWarning && <p className="hint" role="status">{output.audioWarning}</p>}
           </section>
         </div>
@@ -524,7 +528,7 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
           {packFile ? <>
             <a className="button primary" href={packFile} download="memep3.memep3pack"><Icon name="download" />Baixar pacote</a>
             <a className="button outline" href="memep3://importar">Abrir app MemeP3</a>
-            <p className="hint">Com o app MemeP3 instalado, abra o arquivo baixado pelo botão Importar pacote e confirme no WhatsApp.</p>
+            <p className="hint">Abra o pacote baixado no app MemeP3 e confirme no WhatsApp.</p>
             <button type="button" className="button outline" onClick={() => { setPack(undefined); setPackFile(undefined); reset(); }}>Iniciar outro pacote</button>
           </> : <>
             <button type="button" className="button primary" disabled={Boolean(busy) || pack.stickers.length < MIN_PACK_SIZE || !packName.trim()} onClick={() => void preparePack()}>Preparar pacote</button>
