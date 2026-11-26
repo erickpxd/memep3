@@ -22,6 +22,8 @@ Abra http://localhost:3000. Use HTTPS em produção para permitir microfone, com
 
 O botão **Compartilhar** no cabeçalho envia o link da página. No resultado, **Como adicionar ao WhatsApp** oferece o WebP para usar no criador de figurinhas. Para tentar criar com som, salve o MP4 e selecione o vídeo pela galeria em **Figurinhas → Criar** no WhatsApp Beta para Android, em uma conta com esse recurso habilitado. O envio direto do MP4 por compartilhamento ou anexo cria uma mensagem de vídeo.
 
+**Salvar MP4 para o WhatsApp** sugere a pasta de vídeos na janela de salvar quando o navegador oferece esse recurso. Nos demais navegadores, o botão inicia um download.
+
 As opções **Compartilhar arquivo WebP** e **Compartilhar como vídeo** abrem o menu de compartilhamento do dispositivo ou iniciam um download quando o navegador não oferece esse recurso.
 
 A descrição do compartilhamento inclui o endereço do MemeP3. O valor provisório é `memep3.vercel.app`. Defina `NEXT_PUBLIC_MEMEP3_URL` antes do build para usar o domínio definitivo. A descrição também pode ser copiada para colar no WhatsApp.

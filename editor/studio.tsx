@@ -9,7 +9,7 @@ import type { Crop } from "./framing";
 import { FramingView, framingStyle } from "./framing-view";
 import { useRecording } from "./recording";
 import type { Rendered } from "./render";
-import { shareDescription, shareFile } from "./share";
+import { saveVideoForImport, shareDescription, shareFile } from "./share";
 import { capAudio, initialRange, MAX_CLIP, MIN_CLIP, rangeDuration, timeLabel } from "./timing";
 import type { Range } from "./timing";
 
@@ -40,6 +40,33 @@ function download(url: string, name: string) {
   link.href = url;
   link.download = name;
   link.click();
+}
+
+function SaveVideoForImport({ blob, url, filename }: { blob: Blob; url: string; filename: string }) {
+  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "download" | "error">("idle");
+
+  async function save() {
+    setStatus("saving");
+    try {
+      const result = await saveVideoForImport(blob, filename);
+      if (result === "download") download(url, filename);
+      setStatus(result === "cancelled" ? "idle" : result);
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  return <>
+    <button type="button" className="button outline" disabled={status === "saving"} onClick={() => void save()}>
+      <Icon name="download" />Salvar MP4 para o WhatsApp
+    </button>
+    {status === "saved" && <p className="hint" role="status">MP4 salvo. Procure em <strong>Recentes</strong> no criador de figurinhas.</p>}
+    {status === "download" && <p className="hint" role="status">Download iniciado. Procure o MP4 do MemeP3 em <strong>Recentes</strong> ou <strong>Downloads</strong> no seletor do WhatsApp, se disponível.</p>}
+    {status === "error" && <div className="share-fallback">
+      <p className="hint" role="alert">Não foi possível salvar no local escolhido.</p>
+      <a className="button outline" href={url} download={filename}>Baixar MP4</a>
+    </div>}
+  </>;
 }
 
 function Create({ onClick, disabled, label = "Criar minha figurinha" }: { onClick?: () => void; disabled?: boolean; label?: string }) {
@@ -455,10 +482,11 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
                 <strong>Figurinha sem som</strong>
                 <p>Baixe o WebP. No WhatsApp, abra uma conversa e use <strong>Figurinhas → Criar</strong> para selecionar o arquivo, se o seletor da sua versão aceitar WebP.</p>
                 <a className="button outline" href={output.stickerUrl} download="memep3.webp"><Icon name="download" />Salvar WebP para importar</a>
-                {output.videoFilename?.endsWith(".mp4") && output.videoUrl && <>
+                {output.videoFilename?.endsWith(".mp4") && output.videoUrl && output.video && <>
                   <strong>Figurinha com som · Android</strong>
-                  <p>Salve o MP4. No WhatsApp Beta para Android, em uma conta com o recurso habilitado, abra <strong>Figurinhas → Criar</strong> e selecione o vídeo na galeria. Confirme que a prévia tem som antes de enviar.</p>
-                  <a className="button outline" href={output.videoUrl} download={output.videoFilename}><Icon name="download" />Salvar MP4 para importar</a>
+                  <p>Na janela de salvar, escolha <strong>Vídeos</strong> ou a pasta <strong>Movies</strong> no armazenamento interno, se disponível.</p>
+                  <SaveVideoForImport key={output.videoUrl} blob={output.video} url={output.videoUrl} filename={output.videoFilename} />
+                  <p>No WhatsApp Beta para Android, em uma conta com o recurso habilitado, abra <strong>Figurinhas → Criar → Recentes</strong> e selecione o MP4. Confira o som na prévia.</p>
                 </>}
                 {output.videoFilename?.endsWith(".webm") && <p>Para tentar importar com som, gere o MP4 em um navegador com suporte a esse formato.</p>}
               </div>

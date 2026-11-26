@@ -15,6 +15,27 @@ const { outputFiles } = await build({
 });
 const rules = await import("data:text/javascript;base64," + Buffer.from(outputFiles[0].contents).toString("base64"));
 
+test("salvar MP4 sugere a pasta de vídeos e respeita cancelamento e falta de suporte", async (context) => {
+  context.after(() => { delete globalThis.window; });
+  const blob = new Blob(["mp4"], { type: "video/mp4" });
+  globalThis.window = {};
+  assert.equal(await rules.saveVideoForImport(blob, "memep3.mp4"), "download");
+  const calls = [];
+  globalThis.window.showSaveFilePicker = async (options) => {
+    calls.push(options);
+    return { createWritable: async () => ({
+      write: async (file) => calls.push(file),
+      close: async () => calls.push("closed"),
+    }) };
+  };
+  assert.equal(await rules.saveVideoForImport(blob, "memep3.mp4"), "saved");
+  assert.equal(calls[0].startIn, "videos");
+  assert.equal(calls[0].suggestedName, "memep3.mp4");
+  assert.deepEqual(calls.slice(1), [blob, "closed"]);
+  globalThis.window.showSaveFilePicker = async () => { throw new DOMException("cancelado", "AbortError"); };
+  assert.equal(await rules.saveVideoForImport(blob, "memep3.mp4"), "cancelled");
+});
+
 test("a descrição do compartilhamento usa o link configurado ou o provisório", () => {
   assert.equal(rules.shareDescription(""), "Feito no MemeP3 · https://memep3.vercel.app");
   assert.equal(rules.shareDescription("https://meus-memes.example/criar?ref=teste"), "Feito no MemeP3 · https://meus-memes.example/criar");

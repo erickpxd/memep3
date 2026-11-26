@@ -56,3 +56,37 @@ export async function shareFile(file: File) {
     return "download";
   }
 }
+
+type VideoSavePicker = (options: {
+  suggestedName: string;
+  startIn: "videos";
+  types: { description: string; accept: { "video/mp4": string[] } }[];
+}) => Promise<FileSystemFileHandle>;
+
+export async function saveVideoForImport(blob: Blob, filename: string) {
+  const browser = window as Window & { showSaveFilePicker?: VideoSavePicker };
+  if (!browser.showSaveFilePicker) return "download";
+
+  let file: FileSystemFileHandle;
+  try {
+    file = await browser.showSaveFilePicker({
+      suggestedName: filename,
+      startIn: "videos",
+      types: [{ description: "Vídeo MP4", accept: { "video/mp4": [".mp4"] } }],
+    });
+  } catch (error) {
+    if (cancelled(error)) return "cancelled";
+    if (error instanceof DOMException && ["SecurityError", "NotSupportedError"].includes(error.name)) return "download";
+    throw error;
+  }
+
+  const stream = await file.createWritable();
+  try {
+    await stream.write(blob);
+    await stream.close();
+  } catch (error) {
+    await stream.abort().catch(() => {});
+    throw error;
+  }
+  return "saved";
+}
