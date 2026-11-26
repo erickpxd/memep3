@@ -231,7 +231,7 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
       const videoUrl = files.video && URL.createObjectURL(files.video);
       const videoFilename = files.video && (files.video.type.startsWith("video/mp4") ? "memep3-com-audio.mp4" : "memep3-com-audio.webm");
       setOutput({ ...files, stickerUrl: URL.createObjectURL(files.sticker), videoUrl, videoFilename });
-      setResultType(files.video ? "video" : "sticker");
+      setResultType("sticker");
       setScreen("success");
     } catch (cause) {
       if (!controller.signal.aborted) {
@@ -444,19 +444,33 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
             <h2>Ficou a sua cara!</h2>
             <p>{output.video ? "Escolha entre o WebP e o vídeo com áudio." : "Sua figurinha está pronta para baixar."}</p>
             {output.video && <fieldset className="result-formats">
-              <legend>Arquivo para compartilhar</legend>
+              <legend>Formato da prévia</legend>
               <label><input type="radio" name="resultado" checked={resultType === "sticker"} onChange={() => { setResultType("sticker"); setShareStatus("idle"); }} /> WebP sem áudio</label>
               <label><input type="radio" name="resultado" checked={resultType === "video"} onChange={() => { setResultType("video"); setShareStatus("idle"); }} /> Vídeo com áudio</label>
             </fieldset>}
             <div className="result-info"><div><strong>{resultFile.name}</strong><small>{(resultFile.blob.size / 1000).toFixed(1)} KB{output.animated || resultType === "video" ? ` · ${timeLabel(output.duration, 1)}` : ""}</small></div></div>
-            <button className="button primary" disabled={shareStatus === "sharing"} onClick={() => void (async () => {
+            <details className="whatsapp-import">
+              <summary className="button primary full">Como adicionar ao WhatsApp</summary>
+              <div className="whatsapp-instructions">
+                <strong>Figurinha sem som</strong>
+                <p>Baixe o WebP. No WhatsApp, abra uma conversa e use <strong>Figurinhas → Criar</strong> para selecionar o arquivo, se o seletor da sua versão aceitar WebP.</p>
+                <a className="button outline" href={output.stickerUrl} download="memep3.webp"><Icon name="download" />Salvar WebP para importar</a>
+                {output.videoFilename?.endsWith(".mp4") && output.videoUrl && <>
+                  <strong>Figurinha com som · Android</strong>
+                  <p>Salve o MP4. No WhatsApp Beta para Android, em uma conta com o recurso habilitado, abra <strong>Figurinhas → Criar</strong> e selecione o vídeo na galeria. Confirme que a prévia tem som antes de enviar.</p>
+                  <a className="button outline" href={output.videoUrl} download={output.videoFilename}><Icon name="download" />Salvar MP4 para importar</a>
+                </>}
+                {output.videoFilename?.endsWith(".webm") && <p>Para tentar importar com som, gere o MP4 em um navegador com suporte a esse formato.</p>}
+              </div>
+            </details>
+            <button className="button outline" disabled={shareStatus === "sharing"} onClick={() => void (async () => {
               setShareStatus("sharing");
               const status = await shareFile(new File([resultFile.blob], resultFile.name, { type: resultFile.blob.type }));
               if (status === "download") download(resultFile.url, resultFile.name);
               setShareStatus(status === "cancelled" ? "idle" : status);
-            })()}><Icon name="share" />Compartilhar no WhatsApp</button>
+            })()}><Icon name="share" />{resultType === "video" ? "Compartilhar como vídeo" : "Compartilhar arquivo WebP"}</button>
             {shareStatus === "download" && <div className="share-fallback">
-              <p className="hint" role="status">O download foi iniciado. Abra a conversa no WhatsApp Web e anexe <strong>{resultFile.name}</strong>.</p>
+              <p className="hint" role="status">O download foi iniciado. Você pode anexar <strong>{resultFile.name}</strong> na conversa como arquivo.</p>
               <a className="button outline" href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer">Abrir WhatsApp Web</a>
             </div>}
             {shareStatus === "shared" && <p className="hint" role="status">Arquivo entregue ao menu de compartilhamento do dispositivo.</p>}

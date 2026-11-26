@@ -20,7 +20,9 @@ Abra http://localhost:3000. Use HTTPS em produção para permitir microfone, com
 3. Mantenha o áudio original de um vídeo compatível, envie um arquivo de áudio, grave pelo microfone ou selecione **Sem áudio**. O recorte de áudio pode ser posicionado dentro da animação.
 4. Reproduza a prévia, gere o resultado e escolha o formato para baixar ou compartilhar.
 
-O botão **Compartilhar** no cabeçalho envia o link da página e oferece cópia do endereço quando o compartilhamento do sistema não está disponível. No resultado, **Compartilhar no WhatsApp** abre o menu de compartilhamento do dispositivo com o arquivo. Em navegadores sem compartilhamento de arquivos, o botão inicia o download e oferece um link para abrir o WhatsApp Web e anexar o arquivo.
+O botão **Compartilhar** no cabeçalho envia o link da página. No resultado, **Como adicionar ao WhatsApp** oferece o WebP para usar no criador de figurinhas. Para tentar criar com som, salve o MP4 e selecione o vídeo pela galeria em **Figurinhas → Criar** no WhatsApp Beta para Android, em uma conta com esse recurso habilitado. O envio direto do MP4 por compartilhamento ou anexo cria uma mensagem de vídeo.
+
+As opções **Compartilhar arquivo WebP** e **Compartilhar como vídeo** abrem o menu de compartilhamento do dispositivo ou iniciam um download quando o navegador não oferece esse recurso.
 
 A descrição do compartilhamento inclui o endereço do MemeP3. O valor provisório é `memep3.vercel.app`. Defina `NEXT_PUBLIC_MEMEP3_URL` antes do build para usar o domínio definitivo. A descrição também pode ser copiada para colar no WhatsApp.
 
