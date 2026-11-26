@@ -9,7 +9,7 @@ import type { Crop } from "./framing";
 import { FramingView, framingStyle } from "./framing-view";
 import { useRecording } from "./recording";
 import type { Rendered } from "./render";
-import { saveVideoForImport, shareDescription } from "./share";
+import { saveVideoForImport, shareDescription, shareVideo } from "./share";
 import { capAudio, initialRange, MAX_CLIP, MIN_CLIP, rangeDuration, timeLabel } from "./timing";
 import type { Range } from "./timing";
 
@@ -17,6 +17,8 @@ type Screen = "home" | "video" | "record" | "audio" | "preview" | "processing" |
 type AudioMode = "original" | "replace" | "mute";
 type Sound = { file: File; buffer: AudioBuffer; recorded: boolean };
 type Output = Rendered & { stickerUrl: string; videoUrl?: string; videoFilename?: string };
+type ResultType = "video" | "sticker" | "bot";
+const felkuChat = "https://wa.me/5511978775451";
 
 const choices = [
   { mode: "original", icon: "music", title: "Manter áudio original", detail: "Usa o som que já está no vídeo." },
@@ -68,6 +70,25 @@ function AddToWhatsApp({ url, filename, mp4 }: { url: string; filename: string; 
   </>;
 }
 
+function ShareWithStickerBot({ video, filename }: { video: Blob; filename: string }) {
+  const [status, setStatus] = useState<"idle" | "sharing" | "shared" | "unavailable">("idle");
+
+  async function share() {
+    setStatus("sharing");
+    const result = await shareVideo(video, filename);
+    setStatus(result === "cancelled" ? "idle" : result);
+  }
+
+  return <>
+    <p className="hint">Escolha a conversa do Felku (+55 11 97877-5451) no WhatsApp. O bot recebe o vídeo e devolve a figurinha sem som.</p>
+    {status === "unavailable"
+      ? <a className="button primary" href={felkuChat} target="_blank" rel="noopener noreferrer">Abrir conversa do Felku</a>
+      : <button type="button" className="button primary" onClick={() => void share()} disabled={status === "sharing"}>Enviar ao bot</button>}
+    {status === "unavailable" && <p className="hint" role="status">Este navegador não conseguiu compartilhar o vídeo. Use <strong>Baixar</strong> e anexe o arquivo na conversa do Felku.</p>}
+    {status === "shared" && <p className="hint" role="status">Confira a conversa do Felku no WhatsApp. Quando o bot responder, você pode salvar a figurinha nos favoritos.</p>}
+  </>;
+}
+
 function Create({ onClick, disabled, label = "Criar minha figurinha" }: { onClick?: () => void; disabled?: boolean; label?: string }) {
   return <button className="button primary create" disabled={disabled} onClick={onClick}><Icon name="wand" />{label}</button>;
 }
@@ -83,7 +104,7 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
   const [position, setPosition] = useState(0);
   const [prepared, setPrepared] = useState<AudioBuffer>();
   const [output, setOutput] = useState<Output>();
-  const [resultType, setResultType] = useState<"video" | "sticker">("sticker");
+  const [resultType, setResultType] = useState<ResultType>("sticker");
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
   const [progress, setProgress] = useState({ value: 0, label: "" });
@@ -266,7 +287,7 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
 
   const back = () => go("home");
   const audioDescription = mode === "original" ? "Áudio original" : sound?.file.name ?? "Sem áudio";
-  const resultFile = output && resultType === "video" && output.video && output.videoUrl && output.videoFilename
+  const resultFile = output && resultType !== "sticker" && output.video && output.videoUrl && output.videoFilename
     ? { blob: output.video, url: output.videoUrl, name: output.videoFilename }
     : output ? { blob: output.sticker, url: output.stickerUrl, name: "memep3.webp" } : undefined;
   const importMp4 = resultType === "video" && resultFile?.blob.type.startsWith("video/mp4");
@@ -457,7 +478,7 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
         <Heading title="Sua figurinha está pronta!" detail="Veja como ficou e compartilhe a diversão." />
         <div className="result-grid">
           <section className="card preview-card">
-            {resultType === "video" && output.videoUrl
+            {resultType !== "sticker" && output.videoUrl
               ? <figure className="preview-figure"><video src={output.videoUrl} controls playsInline preload="metadata" aria-label="Vídeo final com áudio" /><figcaption>Vídeo com áudio</figcaption></figure>
               : <ClipPlayer visual={stickerVisual} crop={centered} duration={output.duration} caption="É assim que sua figurinha vai aparecer" />}
           </section>
@@ -466,14 +487,17 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
             <h2>Ficou a sua cara!</h2>
             {output.video && <div className="result-format">
               <label htmlFor="result-format">Formato</label>
-              <select id="result-format" value={resultType} onChange={(event) => setResultType(event.currentTarget.value === "video" ? "video" : "sticker")}>
+              <select id="result-format" value={resultType} onChange={(event) => setResultType(event.currentTarget.value as ResultType)}>
                 <option value="sticker">Figurinha WebP sem áudio</option>
                 <option value="video">Vídeo com áudio</option>
+                <option value="bot">Vídeo para o bot do WhatsApp</option>
               </select>
             </div>}
-            <div className="result-info"><div><strong>{resultFile.name}</strong><small>{(resultFile.blob.size / 1000).toFixed(1)} KB{output.animated || resultType === "video" ? ` · ${timeLabel(output.duration, 1)}` : ""}</small></div></div>
-            <AddToWhatsApp key={resultFile.url} url={importMp4 ? resultFile.url : output.stickerUrl}
-              filename={importMp4 ? resultFile.name : "memep3.webp"} mp4={importMp4 ? resultFile.blob : undefined} />
+            <div className="result-info"><div><strong>{resultFile.name}</strong><small>{(resultFile.blob.size / 1000).toFixed(1)} KB{output.animated || resultType !== "sticker" ? ` · ${timeLabel(output.duration, 1)}` : ""}</small></div></div>
+            {resultType === "bot" && output.video
+              ? <ShareWithStickerBot key={resultFile.url} video={output.video} filename={resultFile.name} />
+              : <AddToWhatsApp key={resultFile.url} url={importMp4 ? resultFile.url : output.stickerUrl}
+                  filename={importMp4 ? resultFile.name : "memep3.webp"} mp4={importMp4 ? resultFile.blob : undefined} />}
             <a className="button outline" href={resultFile.url} download={resultFile.name}><Icon name="download" />Baixar</a>
             <button className="button outline" onClick={reset}>Criar outra figurinha</button>
             {resultType === "video" && !importMp4 && <small>O WhatsApp usa o WebP para criar a figurinha sem som. O WebM fica disponível em Baixar.</small>}

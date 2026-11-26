@@ -24,10 +24,12 @@ O botão **Compartilhar** no cabeçalho envia o link da página. No resultado, *
 
 As instruções para adicionar ao WhatsApp incluem o endereço do MemeP3 como descrição para copiar. Defina `NEXT_PUBLIC_MEMEP3_URL` antes do build para usar um domínio diferente de `memep3.vercel.app`.
 
+Se o resultado incluir um vídeo, **Vídeo para o bot do WhatsApp** abre o compartilhamento do dispositivo com o arquivo pronto. Escolha a conversa privada do [Felku](https://felku.com.br/felku/bot-de-figurinhas) e confirme o envio. O Felku recebe o vídeo e devolve uma figurinha animada sem som. Se o navegador não oferecer compartilhamento de arquivos, use **Baixar** e **Abrir conversa do Felku**.
+
 - **WebP de figurinha** tem 512 × 512 px e até 100 KB para imagens estáticas, ou 500 KB e 10 segundos para animações. O arquivo fica sem áudio e segue os limites públicos das [figurinhas do WhatsApp](https://github.com/WhatsApp/stickers/blob/main/Android/README.md).
 - **Vídeo com áudio** sai em MP4 quando há suporte a H.264 e AAC, ou WebM quando há suporte a VP8/VP9 e Opus. A importação como figurinha depende das opções disponíveis no WhatsApp. A geração de figurinhas sonoras nativas exige uma interface pública que o WhatsApp ainda não documenta para sites.
 
-Todo o processamento é local. O editor usa Web Audio para recorte e prévia, Mediabunny para leitura e escrita de mídia e gifuct-js para compor quadros GIF. Quando o navegador não oferece codificação nativa em WebP ou AAC, o editor carrega os codecs WebAssembly locais sob demanda. O navegador só solicita acesso ao microfone ao iniciar uma gravação.
+O editor processa e exporta os arquivos no dispositivo. Se você enviar o vídeo ao bot, o Felku faz a conversão dele a partir da mensagem recebida no WhatsApp. O editor usa Web Audio para recorte e prévia, Mediabunny para leitura e escrita de mídia e gifuct-js para compor quadros GIF. Quando o navegador não oferece codificação nativa em WebP ou AAC, o editor carrega os codecs WebAssembly locais sob demanda. O navegador só solicita acesso ao microfone ao iniciar uma gravação.
 
 ## Extensão
 

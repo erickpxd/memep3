@@ -45,6 +45,17 @@ export async function shareSite(url: string) {
   return address.href;
 }
 
+export async function shareVideo(video: Blob, filename: string) {
+  const files = [new File([video], filename, { type: video.type })];
+  try {
+    if (!navigator.share || !navigator.canShare?.({ files })) return "unavailable";
+    await navigator.share({ files, text: shareDescription() });
+    return "shared";
+  } catch (error) {
+    return cancelled(error) ? "cancelled" : "unavailable";
+  }
+}
+
 type VideoSavePicker = (options: {
   suggestedName: string;
   startIn: "videos";

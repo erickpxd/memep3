@@ -36,6 +36,27 @@ test("salvar MP4 sugere a pasta de vídeos e respeita cancelamento e falta de su
   assert.equal(await rules.saveVideoForImport(blob, "memep3.mp4"), "cancelled");
 });
 
+test("compartilhar com o bot entrega o vídeo ao sistema e respeita o cancelamento", async (context) => {
+  const original = Object.getOwnPropertyDescriptor(globalThis, "navigator");
+  context.after(() => Object.defineProperty(globalThis, "navigator", original));
+  const video = new Blob(["mp4"], { type: "video/mp4" });
+  const calls = [];
+  const navigator = {
+    canShare: ({ files }) => files[0].type === "video/mp4",
+    share: async (data) => calls.push(data),
+  };
+  Object.defineProperty(globalThis, "navigator", { configurable: true, value: navigator });
+  assert.equal(await rules.shareVideo(video, "memep3-com-audio.mp4"), "shared");
+  assert.equal(calls[0].files[0].name, "memep3-com-audio.mp4");
+  assert.equal(await calls[0].files[0].text(), "mp4");
+  assert.equal(calls[0].text, rules.shareDescription());
+  navigator.share = async () => { throw new DOMException("cancelado", "AbortError"); };
+  assert.equal(await rules.shareVideo(video, "memep3-com-audio.mp4"), "cancelled");
+  navigator.canShare = () => false;
+  assert.equal(await rules.shareVideo(video, "memep3-com-audio.mp4"), "unavailable");
+  assert.equal(calls.length, 1);
+});
+
 test("a descrição do compartilhamento usa o link configurado ou o provisório", () => {
   assert.equal(rules.shareDescription(""), "Feito no MemeP3 · https://memep3.vercel.app");
   assert.equal(rules.shareDescription("https://meus-memes.example/criar?ref=teste"), "Feito no MemeP3 · https://meus-memes.example/criar");
