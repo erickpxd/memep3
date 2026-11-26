@@ -123,18 +123,3 @@ test("o compartilhamento do cabeçalho contém só o link e o cancelamento não 
   assert.equal(await rules.shareSite("https://memep3.example/"), "copied");
   assert.equal(calls[1], "https://memep3.example/");
 });
-
-test("arquivo só é compartilhado quando o sistema suporta esse tipo", async (context) => {
-  const descriptor = Object.getOwnPropertyDescriptor(globalThis, "navigator");
-  context.after(() => Object.defineProperty(globalThis, "navigator", descriptor));
-  const calls = [];
-  const file = new File(["x"], "memep3.webp", { type: "image/webp" });
-  Object.defineProperty(globalThis, "navigator", { configurable: true, value: {
-    canShare: () => true, share: (data) => calls.push(data),
-  } });
-  assert.equal(await rules.shareFile(file), "shared");
-  assert.deepEqual(calls[0].files, [file]);
-  assert.equal(calls[0].text, rules.shareDescription());
-  Object.defineProperty(globalThis, "navigator", { configurable: true, value: { canShare: () => false } });
-  assert.equal(await rules.shareFile(file), "download");
-});

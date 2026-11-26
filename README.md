@@ -20,16 +20,12 @@ Abra http://localhost:3000. Use HTTPS em produção para permitir microfone, com
 3. Mantenha o áudio original de um vídeo compatível, envie um arquivo de áudio, grave pelo microfone ou selecione **Sem áudio**. O recorte de áudio pode ser posicionado dentro da animação.
 4. Reproduza a prévia, gere o resultado e escolha o formato para baixar ou compartilhar.
 
-O botão **Compartilhar** no cabeçalho envia o link da página. No resultado, **Como adicionar ao WhatsApp** oferece o WebP para usar no criador de figurinhas. Para tentar criar com som, salve o MP4 e selecione o vídeo pela galeria em **Figurinhas → Criar** no WhatsApp Beta para Android, em uma conta com esse recurso habilitado. O envio direto do MP4 por compartilhamento ou anexo cria uma mensagem de vídeo.
+O botão **Compartilhar** no cabeçalho envia o link da página. No resultado, **Adicionar ao WhatsApp** salva o arquivo para usar em **Figurinhas → Criar → Recentes**. O formato padrão é o WebP sem áudio. Se você escolher o MP4, a janela de salvar sugere a pasta de vídeos quando o navegador oferece esse recurso. A criação com som depende de uma conta habilitada no WhatsApp Beta para Android.
 
-**Salvar MP4 para o WhatsApp** sugere a pasta de vídeos na janela de salvar quando o navegador oferece esse recurso. Nos demais navegadores, o botão inicia um download.
-
-As opções **Compartilhar arquivo WebP** e **Compartilhar como vídeo** abrem o menu de compartilhamento do dispositivo ou iniciam um download quando o navegador não oferece esse recurso.
-
-A descrição do compartilhamento inclui o endereço do MemeP3. O valor provisório é `memep3.vercel.app`. Defina `NEXT_PUBLIC_MEMEP3_URL` antes do build para usar o domínio definitivo. A descrição também pode ser copiada para colar no WhatsApp.
+As instruções para adicionar ao WhatsApp incluem o endereço do MemeP3 como descrição para copiar. Defina `NEXT_PUBLIC_MEMEP3_URL` antes do build para usar um domínio diferente de `memep3.vercel.app`.
 
 - **WebP de figurinha** tem 512 × 512 px e até 100 KB para imagens estáticas, ou 500 KB e 10 segundos para animações. O arquivo fica sem áudio e segue os limites públicos das [figurinhas do WhatsApp](https://github.com/WhatsApp/stickers/blob/main/Android/README.md).
-- **Vídeo com áudio** sai em MP4 quando há suporte a H.264 e AAC, ou WebM quando há suporte a VP8/VP9 e Opus. O compartilhamento entrega um arquivo ao sistema. A importação como figurinha depende das opções disponíveis no WhatsApp. A geração de figurinhas sonoras nativas exige uma interface pública que o WhatsApp ainda não documenta para sites.
+- **Vídeo com áudio** sai em MP4 quando há suporte a H.264 e AAC, ou WebM quando há suporte a VP8/VP9 e Opus. A importação como figurinha depende das opções disponíveis no WhatsApp. A geração de figurinhas sonoras nativas exige uma interface pública que o WhatsApp ainda não documenta para sites.
 
 Todo o processamento é local. O editor usa Web Audio para recorte e prévia, Mediabunny para leitura e escrita de mídia e gifuct-js para compor quadros GIF. Quando o navegador não oferece codificação nativa em WebP ou AAC, o editor carrega os codecs WebAssembly locais sob demanda. O navegador só solicita acesso ao microfone ao iniciar uma gravação.
 

@@ -9,7 +9,7 @@ import type { Crop } from "./framing";
 import { FramingView, framingStyle } from "./framing-view";
 import { useRecording } from "./recording";
 import type { Rendered } from "./render";
-import { saveVideoForImport, shareDescription, shareFile } from "./share";
+import { saveVideoForImport, shareDescription } from "./share";
 import { capAudio, initialRange, MAX_CLIP, MIN_CLIP, rangeDuration, timeLabel } from "./timing";
 import type { Range } from "./timing";
 
@@ -42,13 +42,13 @@ function download(url: string, name: string) {
   link.click();
 }
 
-function SaveVideoForImport({ blob, url, filename }: { blob: Blob; url: string; filename: string }) {
+function AddToWhatsApp({ url, filename, mp4 }: { url: string; filename: string; mp4?: Blob }) {
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "download" | "error">("idle");
 
   async function save() {
     setStatus("saving");
     try {
-      const result = await saveVideoForImport(blob, filename);
+      const result = mp4 ? await saveVideoForImport(mp4, filename) : "download";
       if (result === "download") download(url, filename);
       setStatus(result === "cancelled" ? "idle" : result);
     } catch {
@@ -57,15 +57,14 @@ function SaveVideoForImport({ blob, url, filename }: { blob: Blob; url: string; 
   }
 
   return <>
-    <button type="button" className="button outline" disabled={status === "saving"} onClick={() => void save()}>
-      <Icon name="download" />Salvar MP4 para o WhatsApp
+    <button type="button" className="button primary" disabled={status === "saving"} onClick={() => void save()}>
+      Adicionar ao WhatsApp
     </button>
-    {status === "saved" && <p className="hint" role="status">MP4 salvo. Procure em <strong>Recentes</strong> no criador de figurinhas.</p>}
-    {status === "download" && <p className="hint" role="status">Download iniciado. Procure o MP4 do MemeP3 em <strong>Recentes</strong> ou <strong>Downloads</strong> no seletor do WhatsApp, se disponível.</p>}
-    {status === "error" && <div className="share-fallback">
-      <p className="hint" role="alert">Não foi possível salvar no local escolhido.</p>
-      <a className="button outline" href={url} download={filename}>Baixar MP4</a>
+    {(status === "saved" || status === "download") && <div className="result-status" role="status">
+      <p className="hint">{status === "saved" ? "Arquivo salvo." : "Download iniciado."} No {mp4 ? "WhatsApp Beta para Android, se o recurso estiver habilitado," : "WhatsApp,"} abra <strong>Figurinhas → Criar → Recentes</strong> e escolha o {mp4 ? "MP4 para tentar criar com som" : "WebP, se aparecer no seletor"}.</p>
+      <small className="hint">{shareDescription()}</small>
     </div>}
+    {status === "error" && <p className="hint" role="alert">Não foi possível salvar no local escolhido. Tente novamente ou use Baixar.</p>}
   </>;
 }
 
@@ -90,9 +89,6 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
   const [progress, setProgress] = useState({ value: 0, label: "" });
   const [dragging, setDragging] = useState(false);
   const [link, setLink] = useState("");
-  const [shareStatus, setShareStatus] = useState<"idle" | "sharing" | "download" | "shared">("idle");
-  const [descriptionCopied, setDescriptionCopied] = useState(false);
-  const descriptionField = useRef<HTMLInputElement>(null);
   const audioChoices = visual?.kind === "video" && visual.originalAudio === "missing"
     ? choices.filter(({ mode }) => mode !== "original")
     : choices;
@@ -184,8 +180,6 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
   function go(next: Screen) {
     if (screen === "record" && next !== "record") recorder.cancel();
     setError("");
-    setShareStatus("idle");
-    setDescriptionCopied(false);
     setScreen(next);
   }
 
@@ -275,6 +269,7 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
   const resultFile = output && resultType === "video" && output.video && output.videoUrl && output.videoFilename
     ? { blob: output.video, url: output.videoUrl, name: output.videoFilename }
     : output ? { blob: output.sticker, url: output.stickerUrl, name: "memep3.webp" } : undefined;
+  const importMp4 = resultType === "video" && resultFile?.blob.type.startsWith("video/mp4");
   const stickerVisual = useMemo<Visual | undefined>(() => output ? {
     url: output.stickerUrl, file: new File([output.sticker], "memep3.webp", { type: "image/webp" }),
     mime: "image/webp", kind: output.animated ? "animation" : "image", duration: output.duration,
@@ -459,7 +454,7 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
       </>}
 
       {screen === "success" && output && stickerVisual && resultFile && <>
-        <Heading title="Sua figurinha está pronta!" detail="Veja como ficou e compartilhe a diversão." onBack={reset} backLabel="Criar outra figurinha" />
+        <Heading title="Sua figurinha está pronta!" detail="Veja como ficou e compartilhe a diversão." />
         <div className="result-grid">
           <section className="card preview-card">
             {resultType === "video" && output.videoUrl
@@ -469,56 +464,19 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
           <section className="card result-panel">
             <span className="badge"><Icon name="check" />Figurinha criada</span>
             <h2>Ficou a sua cara!</h2>
-            <p>{output.video ? "Escolha entre o WebP e o vídeo com áudio." : "Sua figurinha está pronta para baixar."}</p>
-            {output.video && <fieldset className="result-formats">
-              <legend>Formato da prévia</legend>
-              <label><input type="radio" name="resultado" checked={resultType === "sticker"} onChange={() => { setResultType("sticker"); setShareStatus("idle"); }} /> WebP sem áudio</label>
-              <label><input type="radio" name="resultado" checked={resultType === "video"} onChange={() => { setResultType("video"); setShareStatus("idle"); }} /> Vídeo com áudio</label>
-            </fieldset>}
+            {output.video && <div className="result-format">
+              <label htmlFor="result-format">Formato</label>
+              <select id="result-format" value={resultType} onChange={(event) => setResultType(event.currentTarget.value === "video" ? "video" : "sticker")}>
+                <option value="sticker">Figurinha WebP sem áudio</option>
+                <option value="video">Vídeo com áudio</option>
+              </select>
+            </div>}
             <div className="result-info"><div><strong>{resultFile.name}</strong><small>{(resultFile.blob.size / 1000).toFixed(1)} KB{output.animated || resultType === "video" ? ` · ${timeLabel(output.duration, 1)}` : ""}</small></div></div>
-            <details className="whatsapp-import">
-              <summary className="button primary full">Como adicionar ao WhatsApp</summary>
-              <div className="whatsapp-instructions">
-                <strong>Figurinha sem som</strong>
-                <p>Baixe o WebP. No WhatsApp, abra uma conversa e use <strong>Figurinhas → Criar</strong> para selecionar o arquivo, se o seletor da sua versão aceitar WebP.</p>
-                <a className="button outline" href={output.stickerUrl} download="memep3.webp"><Icon name="download" />Salvar WebP para importar</a>
-                {output.videoFilename?.endsWith(".mp4") && output.videoUrl && output.video && <>
-                  <strong>Figurinha com som · Android</strong>
-                  <p>Na janela de salvar, escolha <strong>Vídeos</strong> ou a pasta <strong>Movies</strong> no armazenamento interno, se disponível.</p>
-                  <SaveVideoForImport key={output.videoUrl} blob={output.video} url={output.videoUrl} filename={output.videoFilename} />
-                  <p>No WhatsApp Beta para Android, em uma conta com o recurso habilitado, abra <strong>Figurinhas → Criar → Recentes</strong> e selecione o MP4. Confira o som na prévia.</p>
-                </>}
-                {output.videoFilename?.endsWith(".webm") && <p>Para tentar importar com som, gere o MP4 em um navegador com suporte a esse formato.</p>}
-              </div>
-            </details>
-            <button className="button outline" disabled={shareStatus === "sharing"} onClick={() => void (async () => {
-              setShareStatus("sharing");
-              const status = await shareFile(new File([resultFile.blob], resultFile.name, { type: resultFile.blob.type }));
-              if (status === "download") download(resultFile.url, resultFile.name);
-              setShareStatus(status === "cancelled" ? "idle" : status);
-            })()}><Icon name="share" />{resultType === "video" ? "Compartilhar como vídeo" : "Compartilhar arquivo WebP"}</button>
-            {shareStatus === "download" && <div className="share-fallback">
-              <p className="hint" role="status">O download foi iniciado. Você pode anexar <strong>{resultFile.name}</strong> na conversa como arquivo.</p>
-              <a className="button outline" href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer">Abrir WhatsApp Web</a>
-            </div>}
-            {shareStatus === "shared" && <p className="hint" role="status">Arquivo entregue ao menu de compartilhamento do dispositivo.</p>}
-            {(shareStatus === "download" || shareStatus === "shared") && <div className="share-fallback">
-              <label className="share-description">Descrição para compartilhar
-                <input ref={descriptionField} readOnly value={shareDescription()} onFocus={(event) => event.currentTarget.select()} />
-              </label>
-              <button className="button outline" onClick={() => void (async () => {
-                try {
-                  await navigator.clipboard.writeText(shareDescription());
-                  setDescriptionCopied(true);
-                } catch {
-                  descriptionField.current?.focus();
-                  descriptionField.current?.select();
-                }
-              })()}>{descriptionCopied ? "Descrição copiada" : "Copiar descrição"}</button>
-            </div>}
-            <a className="button outline" href={resultFile.url} download={resultFile.name}><Icon name="download" />{resultType === "video" ? "Baixar vídeo" : "Baixar figurinha"}</a>
+            <AddToWhatsApp key={resultFile.url} url={importMp4 ? resultFile.url : output.stickerUrl}
+              filename={importMp4 ? resultFile.name : "memep3.webp"} mp4={importMp4 ? resultFile.blob : undefined} />
+            <a className="button outline" href={resultFile.url} download={resultFile.name}><Icon name="download" />Baixar</a>
             <button className="button outline" onClick={reset}>Criar outra figurinha</button>
-            <small>{resultType === "video" ? "No WhatsApp, este arquivo é enviado como vídeo." : "A instalação como figurinha depende das opções da sua versão do WhatsApp."}</small>
+            {resultType === "video" && !importMp4 && <small>O WhatsApp usa o WebP para criar a figurinha sem som. O WebM fica disponível em Baixar.</small>}
             {output.audioWarning && <p className="hint" role="status">{output.audioWarning}</p>}
           </section>
         </div>

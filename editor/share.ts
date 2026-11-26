@@ -45,18 +45,6 @@ export async function shareSite(url: string) {
   return address.href;
 }
 
-export async function shareFile(file: File) {
-  const data = { files: [file] };
-  if (!navigator.share || !navigator.canShare?.(data)) return "download";
-  try {
-    await navigator.share({ ...data, title: "Minha criação no MemeP3", text: shareDescription() });
-    return "shared";
-  } catch (error) {
-    if (cancelled(error)) return "cancelled";
-    return "download";
-  }
-}
-
 type VideoSavePicker = (options: {
   suggestedName: string;
   startIn: "videos";

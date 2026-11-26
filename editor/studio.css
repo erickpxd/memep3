@@ -138,7 +138,7 @@ button.back:hover { text-decoration: underline; }
 .sync summary { color: var(--link); cursor: pointer; padding: 5px 0; font-weight: 650; }
 
 .audio-panel { display: grid; gap: 13px; padding: 18px 19px; background: #f6f6f9; border: 1px solid #e4e6ed; border-radius: 17px; }
-.options, .timeline, .result-formats { margin: 0; padding: 0; border: 0; min-width: 0; }
+.options, .timeline { margin: 0; padding: 0; border: 0; min-width: 0; }
 .options legend, .timeline legend { padding: 0; font-size: 1rem; font-weight: 720; }
 .options p { color: var(--slate); font-size: .875rem; margin: 2px 0 10px; }
 .option-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; }
@@ -235,12 +235,7 @@ input[type="range"]:not(.handle), input[type="radio"] { accent-color: var(--link
 .player-data .wave { height: 27px; }
 .player-data small { font-variant-numeric: tabular-nums; }
 .result-panel { padding: 24px; display: grid; gap: 13px; }
-.share-fallback { display: grid; gap: 9px; }
-.whatsapp-import > summary { cursor: pointer; list-style: none; }
-.whatsapp-import > summary::-webkit-details-marker { display: none; }
-.whatsapp-instructions { display: grid; gap: 9px; margin-top: 10px; padding: 12px; background: var(--pale); border-radius: 12px; font-size: .875rem; }
-.share-description { display: grid; gap: 4px; font-size: .875rem; }
-.share-description input { min-width: 0; width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--text); background: var(--pale); }
+.result-status { display: grid; gap: 6px; padding: 10px 12px; border-radius: 10px; background: var(--pale); overflow-wrap: anywhere; }
 .badge { display: inline-flex; align-items: center; gap: 7px; background: var(--soft-blue); color: var(--link); border-radius: 99px; padding: 7px 13px; width: fit-content; font-size: .875rem; font-weight: 650; }
 .result-panel h2, .state-card h2 { font-size: 1.75rem; line-height: 1.25; }
 .result-panel p, .state-card p { color: var(--muted); line-height: 1.45; }
@@ -248,9 +243,8 @@ input[type="range"]:not(.handle), input[type="radio"] { accent-color: var(--link
 .result-info { display: flex; align-items: center; gap: 13px; min-width: 0; background: var(--neutral); border-radius: 12px; padding: 14px 16px; text-align: left; }
 .result-info strong { display: block; font-size: .9375rem; overflow-wrap: anywhere; }
 .result-info small { display: block; color: var(--muted); margin-top: 3px; }
-.result-formats { display: grid; gap: 7px; font-size: .875rem; }
-.result-formats legend { font-weight: 650; margin-bottom: 5px; }
-.result-formats label { cursor: pointer; }
+.result-format { display: grid; gap: 5px; font-size: .875rem; font-weight: 650; }
+.result-format select { min-width: 0; width: 100%; min-height: 44px; padding: 7px 9px; border: 1px solid #b9c6d2; border-radius: 8px; color: var(--text); background: var(--bg); font: inherit; font-weight: 400; }
 .state-card { display: grid; justify-items: center; gap: 18px; padding: 48px 24px; text-align: center; }
 .state-card > img.icon { animation: rotate 1s linear infinite; }
 .state-content { display: grid; gap: 13px; width: min(100%, 560px); }
