@@ -1,4 +1,4 @@
-import { AUDIO_LIMIT } from "../editor/media";
+import { AUDIO_LIMIT } from "../shared/editor/media/browser-media";
 
 const hosts = new Set(["myinstants.com", "www.myinstants.com"]);
 const audioPath = /^\/media\/sounds\/[^/]+\.(mp3|ogg|wav)$/i;

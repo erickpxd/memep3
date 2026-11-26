@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { loadImage, paint, seekVideo, videoThumbnails, waveform } from "./media";
-import type { Visual } from "./media";
-import type { Crop } from "./framing";
+import { loadImage, paint, seekVideo, videoThumbnails, waveform } from "../media/browser-media";
+import type { Visual } from "../media/browser-media";
+import type { Crop } from "../media/framing";
 import { FramingView, framingStyle } from "./framing-view";
-import { moveBoundary, timeLabel } from "./timing";
-import type { Range } from "./timing";
-import { shareSite } from "./share";
+import { moveBoundary, timeLabel } from "../media/timing";
+import type { Range } from "../media/timing";
+import { shareSite } from "../export/share";
 
 export function Icon({ name, size }: { name: string; size?: number }) {
   return <img src={`./icons/${name}.svg`} alt="" className="icon" style={size ? { maxWidth: size, maxHeight: size } : undefined} />;
@@ -163,7 +163,7 @@ export function ClipPlayer({ visual, crop, start = 0, duration, audio, audioStar
     if (layer && animationCrop && visual?.kind === "animation") {
       void (async () => {
         try {
-          const animation = await (await import("./animation")).openAnimation(visual);
+          const animation = await (await import("../media/animation")).openAnimation(visual);
           try {
             await animation.draw(0, controller.signal);
             if (!controller.signal.aborted && !session.current) paint(layer, animation.canvas, visual.width, visual.height, animationCrop);
@@ -193,7 +193,7 @@ export function ClipPlayer({ visual, crop, start = 0, duration, audio, audioStar
     const moving = video.current;
     const layer = canvas.current?.getContext("2d");
     let context: AudioContext | undefined;
-    let animation: Awaited<ReturnType<typeof import("./animation").openAnimation>> | undefined;
+    let animation: Awaited<ReturnType<typeof import("../media/animation").openAnimation>> | undefined;
     let handle = 0;
     const clipStart = elapsedTime.current >= duration - 0.01 ? 0 : elapsedTime.current;
     elapsedTime.current = clipStart;
@@ -217,7 +217,7 @@ export function ClipPlayer({ visual, crop, start = 0, duration, audio, audioStar
         await context.resume();
       }
       if (visual?.kind === "animation" && layer) {
-        animation = await (await import("./animation")).openAnimation(visual);
+        animation = await (await import("../media/animation")).openAnimation(visual);
         if (controller.signal.aborted) {
           animation.close();
           return;

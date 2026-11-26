@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import "../editor/studio.css";
+import "../../shared/editor/ui/studio.css";
 
 export const metadata: Metadata = {
   title: "MemeP3 — Crie figurinhas para o WhatsApp",

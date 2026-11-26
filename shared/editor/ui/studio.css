@@ -32,7 +32,7 @@ h1:focus { outline: none; }
 .site {
   display: flow-root;
   min-height: 100dvh;
-  background: linear-gradient(#ffffffbd, #ffffffbd), #fff url("../public/background-continuo.png") repeat top left / 215px 215px;
+  background: linear-gradient(#ffffffbd, #ffffffbd), #fff url("../../../web/public/background-continuo.png") repeat top left / 215px 215px;
 }
 
 .topbar {
@@ -170,7 +170,7 @@ button.back:hover { text-decoration: underline; }
   background: #fff;
   cursor: inherit;
 }
-.audio-option input:checked { border-color: var(--blue); background: var(--blue) url("../public/icons/selected.svg") center/contain no-repeat; }
+.audio-option input:checked { border-color: var(--blue); background: var(--blue) url("../../../web/public/icons/selected.svg") center/contain no-repeat; }
 .audio-option > .icon { grid-row: 1; grid-column: 1; max-width: 25px; }
 .audio-option > span { grid-row: 1; grid-column: 2; min-width: 0; }
 .audio-option strong { display: block; color: #171923; font-size: .9rem; line-height: 1.35; }

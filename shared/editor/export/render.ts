@@ -1,8 +1,8 @@
-import { canvasWebp, loadImage, makeCanvas, openVideo, paint, releaseVideo, seekVideo } from "./media";
-import type { Visual } from "./media";
-import type { Crop } from "./framing";
-import { openAnimation } from "./animation";
-import { frameSchedule, MAX_CLIP, MIN_CLIP } from "./timing";
+import { canvasWebp, loadImage, makeCanvas, openVideo, paint, releaseVideo, seekVideo } from "../media/browser-media";
+import type { Visual } from "../media/browser-media";
+import type { Crop } from "../media/framing";
+import { openAnimation } from "../media/animation";
+import { frameSchedule, MAX_CLIP, MIN_CLIP } from "../media/timing";
 import { ANIMATED_LIMIT, framePayload, muxAnimation, SIDE, STATIC_LIMIT, validateSticker } from "./webp";
 
 export type RenderRequest = {

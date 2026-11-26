@@ -24,14 +24,19 @@
     "isolatedModules": true
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
+    "next-env.d.ts",
+    "*.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "../shared/editor/**/*.ts",
+    "../shared/editor/**/*.tsx",
+    "../extension/*.ts",
+    "../extension/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
-    "dist",
     "out"
   ]
 }

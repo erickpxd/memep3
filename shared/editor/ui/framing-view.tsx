@@ -2,9 +2,9 @@
 
 import { useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { centered, constrainCrop, mediaBox } from "./framing";
-import type { Crop } from "./framing";
-import type { Visual } from "./media";
+import { centered, constrainCrop, mediaBox } from "../media/framing";
+import type { Crop } from "../media/framing";
+import type { Visual } from "../media/browser-media";
 
 export function framingStyle(visual: Visual, crop: Crop) {
   const box = mediaBox(visual.width, visual.height, crop);

@@ -1,6 +1,6 @@
-import { makeCanvas } from "./media";
-import type { Visual } from "./media";
-import { splitAnimation } from "./webp";
+import { makeCanvas } from "./browser-media";
+import type { Visual } from "./browser-media";
+import { splitAnimation } from "../export/webp";
 
 type Patch = { x: number; y: number; width: number; height: number; duration: number; disposal: number; replace: boolean; draw(ctx: CanvasRenderingContext2D): Promise<void> };
 

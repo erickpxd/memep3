@@ -1,6 +1,6 @@
 import { MAX_CLIP, MIN_CLIP } from "./timing";
 import type { Range } from "./timing";
-import { SIDE } from "./webp";
+import { SIDE } from "../export/webp";
 import { mediaBox } from "./framing";
 import type { Crop } from "./framing";
 

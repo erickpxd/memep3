@@ -1,6 +1,6 @@
 # MemeP3
 
-Editor de figurinhas que roda no navegador, em Next.js e TypeScript. A interface segue o [Figma do MemeP3](https://www.figma.com/design/WKxiDUIB4OApWJkoQd0gTw/memep3?node-id=0-1) e usa os assets preparados em `public/`.
+Editor de figurinhas que roda no navegador, em Next.js e TypeScript. A interface segue o [Figma do MemeP3](https://www.figma.com/design/WKxiDUIB4OApWJkoQd0gTw/memep3?node-id=0-1) e usa os assets preparados em `web/public/`.
 
 ## Executar
 
@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Abra http://localhost:3000. Use HTTPS em produção para permitir microfone, compartilhamento e acesso às APIs de mídia. `npm run build:web` gera os arquivos estáticos em `out/`. Eles podem ser hospedados sem servidor Next.js.
+Abra http://localhost:3000. Use HTTPS em produção para permitir microfone, compartilhamento e acesso às APIs de mídia. `npm run build:web` gera os arquivos estáticos em `web/out/`. Eles podem ser hospedados sem servidor Next.js.
 
 ## Criar e compartilhar
 
@@ -49,7 +49,7 @@ O editor processa e exporta os arquivos no dispositivo. O editor usa Web Audio p
 npm run build:extension
 ```
 
-Em `chrome://extensions` ou `edge://extensions`, ative o modo do desenvolvedor e carregue a pasta `dist/extension`. A extensão abre o mesmo editor em uma aba. O campo adicional do MyInstants baixa um áudio apenas quando o usuário solicita.
+Em `chrome://extensions` ou `edge://extensions`, ative o modo do desenvolvedor e carregue a pasta `extension/dist/`. A extensão abre o mesmo editor em uma aba. O campo adicional do MyInstants baixa um áudio apenas quando o usuário solicita.
 
 ## Testes
 

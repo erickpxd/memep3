@@ -1,4 +1,4 @@
-import { MAX_CLIP } from "./timing";
+import { MAX_CLIP } from "../media/timing";
 
 export const SIDE = 512;
 export const STATIC_LIMIT = 100_000;

@@ -1,4 +1,4 @@
-import Studio from "../editor/studio";
+import Studio from "../../shared/editor/studio";
 
 export default function Page() {
   return <Studio />;

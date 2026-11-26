@@ -5,7 +5,7 @@ import { build } from "esbuild";
 
 const { outputFiles } = await build({
   stdin: {
-    contents: 'export * from "./editor/timing"; export * from "./editor/webp"; export * from "./editor/share"; export * from "./editor/framing"; export * from "./editor/sticker-pack";',
+    contents: 'export * from "./editor/media/timing"; export * from "./editor/export/webp"; export * from "./editor/export/share"; export * from "./editor/media/framing"; export * from "./editor/export/sticker-pack";',
     resolveDir: fileURLToPath(new URL("..", import.meta.url)),
   },
   write: false,

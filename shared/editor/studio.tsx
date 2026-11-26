@@ -1,18 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ClipPlayer, Header, Heading, Icon, MediaThumb, PickFile, SecondInput, Thumbnails, Timeline, Wave } from "./controls";
-import { audioTypes, originalAudio, readAudio, readVisual, replacementAudio, visualTypes, waveform } from "./media";
-import type { Visual } from "./media";
-import { centered } from "./framing";
-import type { Crop } from "./framing";
-import { FramingView, framingStyle } from "./framing-view";
-import { useRecording } from "./recording";
-import type { Rendered } from "./render";
-import { saveVideoForImport } from "./share";
-import { makeStickerPack, MAX_PACK_SIZE, MIN_PACK_SIZE } from "./sticker-pack";
-import { capAudio, initialRange, MAX_CLIP, MIN_CLIP, rangeDuration, timeLabel } from "./timing";
-import type { Range } from "./timing";
+import { ClipPlayer, Header, Heading, Icon, MediaThumb, PickFile, SecondInput, Thumbnails, Timeline, Wave } from "./ui/controls";
+import { audioTypes, originalAudio, readAudio, readVisual, replacementAudio, visualTypes, waveform } from "./media/browser-media";
+import type { Visual } from "./media/browser-media";
+import { centered } from "./media/framing";
+import type { Crop } from "./media/framing";
+import { FramingView, framingStyle } from "./ui/framing-view";
+import { useRecording } from "./media/recording";
+import type { Rendered } from "./export/render";
+import { saveVideoForImport } from "./export/share";
+import { makeStickerPack, MAX_PACK_SIZE, MIN_PACK_SIZE } from "./export/sticker-pack";
+import { capAudio, initialRange, MAX_CLIP, MIN_CLIP, rangeDuration, timeLabel } from "./media/timing";
+import type { Range } from "./media/timing";
 
 type Screen = "home" | "video" | "record" | "audio" | "preview" | "processing" | "success" | "pack" | "error";
 type AudioMode = "original" | "replace" | "mute";
@@ -269,7 +269,7 @@ export default function Studio({ importLink }: { importLink?: (url: string) => P
     setProgress({ value: 0, label: "Preparando sua mídia" });
     setScreen("processing");
     try {
-      const { renderSticker } = await import("./render");
+      const { renderSticker } = await import("./export/render");
       const files = await renderSticker({
         visual, crop, start: renderStart, duration, audio: prepared, signal: controller.signal,
         onProgress: (value, label) => {

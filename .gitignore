@@ -4,4 +4,4 @@ out/
 dist/
 next-env.d.ts
 *.tsbuildinfo
-public/codecs/
+web/public/codecs/
