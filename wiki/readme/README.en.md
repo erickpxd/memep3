@@ -4,6 +4,12 @@
 
 # MemeP3
 
+[![Open MemeP3](https://img.shields.io/badge/Open-MemeP3-0EA5E9?style=flat-square&logo=vercel&logoColor=white)](https://memep3.vercel.app/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=nextdotjs&logoColor=white)](../../package.json)
+[![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](../../package.json)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white)](../../package.json)
+[![License: MIT or Apache 2.0](https://img.shields.io/badge/License-MIT%20or%20Apache%202.0-22C55E?style=flat-square)](#credits-and-license)
+
 **Make WhatsApp stickers from images, GIFs, and videos. Trim, frame, and experiment with sound.**
 
 [**Open the editor**](https://memep3.vercel.app/) · [Project wiki (Portuguese)](../README.md) · [Figma design](https://www.figma.com/design/WKxiDUIB4OApWJkoQd0gTw/memep3?node-id=0-1) · [Report an issue](https://github.com/erickpxd/memep3/issues)
@@ -11,6 +17,17 @@
 [Português (BR)](../../README.md) · **English** · [Español](README.es.md) · [Français](README.fr.md)
 
 </div>
+
+[![MemeP3 home screen with the image and video upload area](../assets/screenshots/desktop.png)](https://memep3.vercel.app/)
+
+<details>
+<summary><strong>See the editor in action</strong></summary>
+
+![MemeP3 editor with the project logo loaded, framing and zoom controls, and audio options](../assets/screenshots/editor.png)
+
+Screenshots from the [live site](https://memep3.vercel.app/): home screen and editor with the project logo loaded as an example. The interface is in Portuguese.
+
+</details>
 
 ## What you can do
 

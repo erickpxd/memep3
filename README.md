@@ -4,6 +4,12 @@
 
 # MemeP3
 
+[![Abrir MemeP3](https://img.shields.io/badge/Abrir-MemeP3-0EA5E9?style=flat-square&logo=vercel&logoColor=white)](https://memep3.vercel.app/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=nextdotjs&logoColor=white)](package.json)
+[![React](https://img.shields.io/badge/React-19-149ECA?style=flat-square&logo=react&logoColor=white)](package.json)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white)](package.json)
+[![Licença: MIT ou Apache 2.0](https://img.shields.io/badge/Licen%C3%A7a-MIT%20ou%20Apache%202.0-22C55E?style=flat-square)](#créditos-e-licença)
+
 **Crie figurinhas para o WhatsApp a partir de imagens, GIFs e vídeos. Recorte, enquadre e experimente com som.**
 
 [**Abrir editor**](https://memep3.vercel.app/) · [Wiki](wiki/README.md) · [Design no Figma](https://www.figma.com/design/WKxiDUIB4OApWJkoQd0gTw/memep3?node-id=0-1) · [Reportar problema](https://github.com/erickpxd/memep3/issues)
@@ -11,6 +17,17 @@
 **Português (BR)** · [English](wiki/readme/README.en.md) · [Español](wiki/readme/README.es.md) · [Français](wiki/readme/README.fr.md)
 
 </div>
+
+[![Tela inicial do MemeP3 com a área para enviar imagens e vídeos](wiki/assets/screenshots/desktop.png)](https://memep3.vercel.app/)
+
+<details>
+<summary><strong>Veja o editor em ação</strong></summary>
+
+![Editor do MemeP3 com a imagem do projeto carregada, ajustes de enquadramento, zoom e opções de áudio](wiki/assets/screenshots/editor.png)
+
+Capturas do [site em produção](https://memep3.vercel.app/): tela inicial e editor com o logo do projeto carregado como exemplo.
+
+</details>
 
 ## O que dá para fazer
 
